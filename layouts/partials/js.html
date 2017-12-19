@@ -1,0 +1,33 @@
+<script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+<!-- <script src="{{ .Site.BaseURL }}js/highlight.min.js"></script> -->
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+
+{{ if .Site.Params.highlightjs }}
+  <script src="{{ .Site.BaseURL }}js/highlight.min.js" defer></script>
+  {{ range .Site.Params.highlightjslanguages }}
+    <script src="///cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/{{.}}.min.js" defer></script>
+  {{ end }}
+{{ end }}
+
+{{ if .Site.Params.progressively }}
+  <script src="{{ .Site.BaseURL }}js/progressively.min.js" defer></script>
+{{ end }}
+
+{{ template "_internal/google_analytics_async.html" . }}
+
+<script>
+  window.onload = function() {
+    {{ if .Site.Params.highlightjs }}
+      hljs.initHighlighting();
+    {{ end }}
+    {{ if .Site.Params.progressively }}
+      progressively.init({delay: 30, throttle: 50});
+    {{ end }}
+  };
+</script>

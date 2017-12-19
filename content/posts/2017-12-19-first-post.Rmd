@@ -1,0 +1,15 @@
+---
+title: First Post
+author: Kanishka
+date: '2017-12-19'
+slug: first-post
+categories: []
+tags: []
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse = TRUE)
+```
+
+# Hello World!
+
