@@ -3,34 +3,34 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/kanishka.xyz/about/</loc>
+    <loc>/www.kanishka.xyz/about/</loc>
     <lastmod>2017-12-19T14:02:37+02:00</lastmod>
   </url>
   
   <url>
-    <loc>/kanishka.xyz/2017/first-post/</loc>
+    <loc>/www.kanishka.xyz/2017/first-post/</loc>
     <lastmod>2017-12-19T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/kanishka.xyz/categories/</loc>
+    <loc>/www.kanishka.xyz/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/kanishka.xyz/</loc>
-    <lastmod>2017-12-19T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/kanishka.xyz/posts/</loc>
+    <loc>/www.kanishka.xyz/</loc>
     <lastmod>2017-12-19T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/kanishka.xyz/tags/</loc>
+    <loc>/www.kanishka.xyz/posts/</loc>
+    <lastmod>2017-12-19T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/www.kanishka.xyz/tags/</loc>
     <priority>0</priority>
   </url>
   
