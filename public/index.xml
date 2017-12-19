@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>Kanishka Misra</title>
-    <link>/kanishka.netlify.com/</link>
+    <link>/</link>
     <description>Recent content on Kanishka Misra</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Tue, 19 Dec 2017 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/kanishka.netlify.com/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>First Post</title>
-      <link>/kanishka.netlify.com/2017/first-post/</link>
+      <link>/2017/first-post/</link>
       <pubDate>Tue, 19 Dec 2017 00:00:00 +0000</pubDate>
       
-      <guid>/kanishka.netlify.com/2017/first-post/</guid>
+      <guid>/2017/first-post/</guid>
       <description>Hello World!  </description>
     </item>
     
