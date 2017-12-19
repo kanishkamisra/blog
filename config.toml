@@ -1,5 +1,5 @@
 # Site settings
-baseurl = "your_site_url_address"
+baseurl = "kanishka.netlify.com"
 languageCode = "en"
 title = "Kanishka Misra"
 theme = "hugo-theme-cactus-plus"

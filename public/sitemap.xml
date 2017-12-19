@@ -3,34 +3,34 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
-    <loc>/your_site_url_address/about/</loc>
+    <loc>/kanishka.netlify.com/about/</loc>
     <lastmod>2017-12-19T14:02:37+02:00</lastmod>
   </url>
   
   <url>
-    <loc>/your_site_url_address/2017/first-post/</loc>
+    <loc>/kanishka.netlify.com/2017/first-post/</loc>
     <lastmod>2017-12-19T00:00:00+00:00</lastmod>
   </url>
   
   <url>
-    <loc>/your_site_url_address/categories/</loc>
+    <loc>/kanishka.netlify.com/categories/</loc>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/your_site_url_address/</loc>
-    <lastmod>2017-12-19T00:00:00+00:00</lastmod>
-    <priority>0</priority>
-  </url>
-  
-  <url>
-    <loc>/your_site_url_address/posts/</loc>
+    <loc>/kanishka.netlify.com/</loc>
     <lastmod>2017-12-19T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/your_site_url_address/tags/</loc>
+    <loc>/kanishka.netlify.com/posts/</loc>
+    <lastmod>2017-12-19T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/kanishka.netlify.com/tags/</loc>
     <priority>0</priority>
   </url>
   
