@@ -14,3 +14,5 @@ understand online predator behavior by using text as data (preferably in R).
 
 This blog is built using blogdown and renders my analyses in Rmarkdown into visually appealing
 (hopefully) blog posts that you can read and comment about.
+
+Full cv [here](/pdf/Kanishka_Misra_CV.pdf)
