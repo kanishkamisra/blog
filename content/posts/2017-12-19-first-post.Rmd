@@ -41,7 +41,7 @@ blogdown::shortcode('tweet', '926509282874585089')
 
 # What?
 
-While a blog about data science can certainly help my career, I am also curious to create content that focuses on trends and observations around the world. And so, a lot of (**definitely not all**) my posts would be around open data that describes conditions in a particular region, or the world as a whole. The major goal behind choosing this topic for a majority of my posts is to try and make the reader think about what they thought was going on and what is the actual, fact-based reality. As Daniel Kahneman puts it: *we are bad intuitive statisticans*
+While a blog about data science can certainly help my career, I am also curious to create content that focuses on trends and observations around the world. And so, a lot of (**definitely not all**) my posts would be around open data that describes conditions in a particular region, or the world as a whole. The major goal behind choosing this topic for a majority of my posts is to try and make the reader think about what they thought was going on and what is the actual, fact-based reality. As Daniel Kahneman puts it: *we are bad intuitive statisticians*
 
 Some posts will also focus on cultural analysis (like text analysis of song lyrics or a speech but **not** a tweet), while some will look at statistical and modeling concepts and some might just be random analyses that are supposed to make you laugh.
 
