@@ -1,5 +1,6 @@
 ---
-title: First Post
+title: "First Post"
+description: Why, what and how of this blog
 author: Kanishka
 date: '2017-12-19'
 slug: first-post
@@ -8,8 +9,77 @@ tags: []
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(collapse = TRUE)
+library(knitr)
+
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  warning = FALSE,
+  message = FALSE
+)
+Sys.setenv(LANG = "en")
 ```
 
-# Hello World!
+# Why?
+
+I feel no other content can do enough justice to a blog's first post than the one describing why the author would take out time from his/her daily routine and write about stuff. So lets start with the why:
+
+Over the course of my undergraduate degree at Purdue, I have increasingly grown fond of the R programming language as part of my journey in a data driven career. The community surrounding the open-source language is one of the main reasons why I believe R has become so popular in data projects as well as data science teams in industry. Most of the active members of the R community are on twitter and their tweets or top quality blog posts keep inspiring me to push my limits as to what I can do with the power of data driven programming.
+
+[David Robinson](https://twitter.com/drob)'s recent [post](http://varianceexplained.org/r/start-blog/) serves as a great advice to all aspiring data scientists since it stresses on the importance of creating public artifacts and writing about them from a career perspective. David talks about how a data blog can help:
+
+>1. Practicing skills you are proud of and showing them off by writing about them.
+2. Interacting with community by making work public and sharing.
+3. Learning about prospective skills to work on through community feedback.
+
+As I hopefully transition into grad school, I'd like to stick to these principles while also putting emphasis on improving my communication of analysis and results which would more than just help me in my career.
+
+```{r echo=FALSE}
+blogdown::shortcode('tweet', '926509282874585089')
+```
+
+
+# What?
+
+While a blog about data science can certainly help my career, I am also curious to create content that focuses on trends and observations around the world. And so, a lot of (**definitely not all**) my posts would be around open data that describes conditions in a particular region, or the world as a whole. The major goal behind choosing this topic for a majority of my posts is to try and make the reader think about what they thought was going on and what is the actual, fact-based reality. As Daniel Kahneman puts it: *we are bad intuitive statisticans*
+
+Some posts will also focus on cultural analysis (like text analysis of song lyrics or a speech but **not** a tweet), while some will look at statistical and modeling concepts and some might just be random analyses that are supposed to make you laugh.
+
+But one thing is for sure: none of my posts would be polished and I will not actually be change people's opinions (contrary to the subtitle of the website) since that is more under their control, and I myself am still learning a lot about global devleopment. But I would still like to work on these problems in whatever small way I can and follow David Robinson's mantra: *sharing **anything** is almost always better than sharing nothing.*
+
+# How?
+
+And finally, the how. This would be rather short since it is much less important than what is produced as content. 
+
+As an R enthusiast, I am using the [blogdown](https://bookdown.org/yihui/blogdown/) package and reference guide (written by [Yihui Xie](https://yihui.name/en/), [Amber Thomas](http://amber.rbind.io/), [Alison Presmanes Hill](https://alison.rbind.io/)) to run this website. Blogdown integrates with [Hugo](https://gohugo.io/) to generate the posts on this website by rendering my analysis in Rmarkdown as markdown documents. 
+
+As an example:
+
+```{r example}
+library(gapminder)
+library(tidyverse)
+
+gapminder %>%
+  filter(continent != "Oceania") %>%
+  ggplot(aes(year, lifeExp, group = country, color = country)) +
+  geom_line(lwd = 1, show.legend = FALSE) + 
+  facet_wrap(~ continent) +
+  scale_color_manual(values = country_colors) +
+  scale_x_continuous(breaks = seq(1950, 2010, by = 10), limits = c(1950, 2010)) +
+  scale_y_continuous(breaks = seq(20, 100, by = 20), limits = c(20, 85)) +
+  theme_minimal() +
+  theme(
+    strip.text = element_text(size = rel(1.1), face = "bold"),
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, size = rel(1))
+  ) +
+  ggtitle("Life Expectancy of countries over the years (1952 - 2007)") + 
+  labs(
+    caption = "Source: Gapminder",
+    subtitle = "Countries in Oceania are ignored for some reason"
+  )
+
+```
+
+And so there you have it, a small code snippet and a resulting plot - the essence of this blog along with the accompanying written content. If any of this sounds remotely interesting to you, I welcome you to kanishka.xyz!
 
