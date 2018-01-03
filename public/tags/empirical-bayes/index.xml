@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Post on Kanishka Misra</title>
-    <link>/post/</link>
-    <description>Recent content in Post on Kanishka Misra</description>
+    <title>Empirical Bayes on Kanishka Misra</title>
+    <link>/tags/empirical-bayes/</link>
+    <description>Recent content in Empirical Bayes on Kanishka Misra</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 03 Jan 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 01 Jan 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/empirical-bayes/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Attitudes of employees towards mental health in the tech workplace</title>
       <link>/post/osmi-mental-health-in-tech-survey-data/</link>
-      <pubDate>Wed, 03 Jan 2018 00:00:00 +0000</pubDate>
+      <pubDate>Mon, 01 Jan 2018 00:00:00 +0000</pubDate>
       
       <guid>/post/osmi-mental-health-in-tech-survey-data/</guid>
       <description>Understanding and accepting mental health as an issue at the workplace has become ever so crucial in recent times. Open Sourcing Mental Illness is a non profit organization that focuses on raising awareness, education and providing resources to support mental wellness at workplaces, especially in the tech industry. In 2014, they conducted their first ever survey which had questions pertaining to how mental health is perceived at tech workplaces by employees and their employers.</description>

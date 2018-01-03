@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Kanishka Misra</title>
-    <link>/</link>
-    <description>Recent content on Kanishka Misra</description>
+    <title>Ggplot2 on Kanishka Misra</title>
+    <link>/tags/ggplot2/</link>
+    <description>Recent content in Ggplot2 on Kanishka Misra</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
     <lastBuildDate>Wed, 03 Jan 2018 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="/tags/ggplot2/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
@@ -18,16 +18,6 @@
       
       <guid>/post/osmi-mental-health-in-tech-survey-data/</guid>
       <description>Understanding and accepting mental health as an issue at the workplace has become ever so crucial in recent times. Open Sourcing Mental Illness is a non profit organization that focuses on raising awareness, education and providing resources to support mental wellness at workplaces, especially in the tech industry. In 2014, they conducted their first ever survey which had questions pertaining to how mental health is perceived at tech workplaces by employees and their employers.</description>
-    </item>
-    
-    <item>
-      <title>The First Post</title>
-      <link>/2017/first-post/</link>
-      <pubDate>Tue, 19 Dec 2017 00:00:00 +0000</pubDate>
-      
-      <guid>/2017/first-post/</guid>
-      <description>Why? I feel no other content can do enough justice to a blog’s first post than the one describing why the author would take out time from his/her daily routine and write about stuff. So lets start with the why:
-Over the course of my undergraduate degree at Purdue, I have increasingly grown fond of the R programming language as part of my journey in a data driven career. The community surrounding the open-source language is one of the main reasons why I believe R has become so popular in data projects as well as data science teams in industry.</description>
     </item>
     
   </channel>

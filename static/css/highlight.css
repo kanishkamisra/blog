@@ -7,8 +7,8 @@ code {
     /*font-weight: 100;*/
     padding: 4px;
     border: none;
-    box-shadow: inset 0 0 0 1px;
-    padding: 1px 4px 4px 4px;
+    box-shadow: inset 0 0 0 0;
+    padding: 4px 4px 4px 4px;
     overflow: scroll;
     font-family: 'Menlo', 'Monaco', Courier, monospace;
 }
