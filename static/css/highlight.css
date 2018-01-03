@@ -1,9 +1,10 @@
 @import url('https://fonts.googleapis.com/css?family=Inconsolata');
 
 code {
-    background: #fff;
-    font-size: 16px;
-    font-weight: bold;
+    font-size: 12px;
+    color: #333;
+    background: #f7f7f7;
+    /*font-weight: bold;*/
     /*font-weight: 100;*/
     padding: 4px;
     border: none;
@@ -11,6 +12,7 @@ code {
     padding: 4px 4px 4px 4px;
     overflow: scroll;
     font-family: 'Menlo', 'Monaco', Courier, monospace;
+    margin: 0;
 }
 
 code.hljs {
@@ -21,7 +23,7 @@ code.hljs {
   word-wrap: normal;
   font-weight: normal;
   color: #333;
-  background: #f8f8f8;
+  background: #f7f7f7;
 }
 
 pre code {

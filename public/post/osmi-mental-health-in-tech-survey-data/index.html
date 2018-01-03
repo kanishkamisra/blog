@@ -72,7 +72,7 @@
                     </h1>
                     <h2 class="headline">
                     Jan 3, 2018 00:00
-                    · 2670 words
+                    · 2764 words
                     · 13 minute read
                       <span class="tags">
                       
@@ -93,7 +93,7 @@
                   
                 
                 <section id="post-body">
-                    <p>Understanding and accepting mental health as an issue at the workplace has become ever so crucial in recent times. Open Sourcing Mental Illness is a non profit organization that focuses on raising awareness, education and providing resources to support mental wellness at workplaces, especially in the tech industry. In 2014, they conducted their first ever survey which had questions pertaining to how mental health is perceived at tech workplaces by employees and their employers.</p>
+                    <p>Understanding and accepting mental health as an issue at the workplace has become ever so crucial in recent times. Mental illnesses like depression and anxiety can have a significant economic impact; the estimated cost to the global economy is US$ 1 trillion per year in lost productivity (<a href="http://www.who.int/mental_health/in_the_workplace/en/">source</a>). Open Sourcing Mental Illness (<a href="https://osmihelp.org/">OSMI</a>) is a non profit organization that focuses on raising awareness, education and providing resources to support mental wellness at workplaces, especially in the tech industry. In 2014, they conducted their first ever survey which had questions pertaining to how mental health is perceived at tech workplaces by employees and their employers.</p>
 <p>This survey had over 1200 responses and the data from these responses was made public, which gives us an interesting opportunity to analyze the attitudes of tech-workers from 48 different countries towards mental health.</p>
 <div id="loading-libraries-and-data" class="section level2">
 <h2>Loading libraries and data</h2>
@@ -146,7 +146,7 @@ skimr::skim(mental_health)</code></pre>
 ##    variable missing complete    n        min        max     median n_unique
 ## 1 Timestamp       0     1259 1259 2014-08-27 2016-02-01 2014-08-28     1246</code></pre>
 <p>The <code>skimr</code> package really helps in showing a human-readable, compact summary overview of the data which allows identifying missing values in columns among the other benefits it provides.</p>
-<p>The data is mostly categorical and in fact includes all responses to questions that correspond to the column names. The column names obviously do not look like questions, but this is because the maintainers of the data have assigned each question a column name and this list can be found <a href="https://www.kaggle.com/osmi/mental-health-in-tech-survey">here</a> There are columns with missing data, columns with bizzare values, and columns with values that we can group together (<code>Gender</code>). We can now start our adventure in exploring this data by tidying up these columns.</p>
+<p>The data is mostly categorical and in fact includes all responses to questions that correspond to the column names. The column names obviously do not look like questions, but this is because the maintainers of the data have assigned each question a column name and this list can be found <a href="https://www.kaggle.com/osmi/mental-health-in-tech-survey">here</a>. There are columns with missing data, columns with bizzare values, and columns with values that we can group together (<code>Gender</code>). We can now start our adventure in exploring this data by tidying up these columns.</p>
 <pre class="r"><code>mental_health &lt;- mental_health  %&gt;%
   select(-c(state, comments, Timestamp)) %&gt;%
   filter(between(Age, 18, 90)) %&gt;%
@@ -310,7 +310,7 @@ treatment_estimate</code></pre>
   )</code></pre>
 <p><img src="/post/2018-01-01-osmi-mental-health-in-tech-survey-data_files/figure-html/estimate_plot-1.png" width="1800" /></p>
 <p>This plot shows all responses to questions and the proportion of respondents who have sought treatment in each response category.</p>
-<p>83% of employees in the survey who felt their mental illness often interferes with their work (<code>work_interfere</code> addresses this question) have sought treatment for mental health. We can also see that many respondents with a family history (<code>family_history</code>) of mental illness as well as those who face difficulties in getting leave due to mental health issues (<code>leave</code>) have higher occurence in seeking treatment for mental health in the survey.</p>
+<p>Example of interpretation: 83% of employees in the survey who felt their mental illness often interferes with their work (<code>work_interfere</code> addresses this question) have sought treatment for mental health. We can also see that many respondents with a family history (<code>family_history</code>) of mental illness as well as those who face difficulties in getting leave due to mental health issues (<code>leave</code>) have higher occurence in seeking treatment for mental health in the survey.</p>
 </div>
 <div id="alternative-visualization" class="section level2">
 <h2>Alternative visualization</h2>
@@ -356,7 +356,10 @@ treatment_estimate %&gt;%
 <li>respondents who feel their <strong>company does not take mental health as seriously as physical health</strong> also accounted for being high in number of treatment seekers.</li>
 <li>the same thing is observed with employees who think <strong>discussing their mental health issues with the employer can have a negative consequence</strong></li>
 </ul>
-<p>Analyses similar to the one I have presented can contribute to, or potentially ignite further, much better research about mental health at workplaces. There are a number of ideas that can be applied to this data:</p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>Often times an employee with mental health issues will not seek treatment because they fear its effect on their work. But in this analysis, we have seen how employees who seek treatment feel about their workplace in relation to their mental health. Analyses similar to the one I have presented can contribute to, or potentially ignite further, much better research about mental health at workplaces. There is a lot more data than what I was able to present here and so there are a number of ideas that can be applied to this data, such as:</p>
 <ol style="list-style-type: decimal">
 <li>Creating a <code>disclosure</code> metric that looks at the extent to which employees can dicuss mental issues with their employers (coworkers, supervisors, and during interview). This can be set up as an ordinal regression problem by making the metric ordinal, like a likert-scale (0-10).</li>
 <li>I have looked at seeking treatment and its proportions across different responses and response categories, the same can be done with any question with complete data (presence of missing variables causes more ambiguity than what is already present in the survey data due to sampling bias, both voluntary and no-response)</li>
