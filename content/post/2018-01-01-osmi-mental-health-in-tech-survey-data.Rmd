@@ -67,7 +67,7 @@ Let's take the ```treatment``` variable for example, it corresponds to the quest
 
 ```{r treatment_intro}
 mental_health %>%
-  count(benefits)
+  count(treatment)
 ```
 It looks fairly balanced in terms of diversity in responses, no unknowns. We can look at differences in how employees who have been treated for mental health issues responded to some of the questions on the survey:
 
