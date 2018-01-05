@@ -213,3 +213,5 @@ Often times an employee with mental health issues will not seek treatment becaus
 3. Anything you can think of, the data is all present [here](https://www.kaggle.com/osmi/mental-health-in-tech-survey/data) along with the new, 2016 survey results which can be found [here](https://www.kaggle.com/osmi/mental-health-in-tech-2016/data)
 
 I hope you enjoyed reading this analysis, it is my hope to continue writing more data-driven posts in the future as I have mentioned countless times in the past to be the major reason behind this website. I wish everyone a happy 2018!
+
+You can check out the R code used to write this post [here](https://github.com/kanishkamisra/blog)
