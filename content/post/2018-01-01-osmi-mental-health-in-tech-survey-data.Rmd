@@ -57,7 +57,7 @@ mental_health <- mental_health  %>%
 skimr::skim(mental_health)
 ```
 
-We can ignore a few columns like ```state```, ```comments``` and ```Timestamp``` since they do not provide much benefit in the analysis. While I really appreciate the survey keeping gender as a free response, employees with gender variance form a very small subset of the data, hence we can club everyone with variability in their gender(neither male nor female) as ```gender_variance``` only for the sake of this analysis. There are values for ```Age``` that make no sense and so we restrict the ```Age``` column to be between 18 and 90 (and remove all rows that have nonsensical ages). Finally, we replace missing values in ```self_employed``` and ```work_interference``` with "unknown".
+We can ignore a few columns like ```state```, ```comments``` and ```Timestamp``` since they do not provide much benefit in the analysis. While I really appreciate the survey keeping gender as a free response, employees with gender variance form a very small subset of the data, hence we can club everyone with variability in their gender(neither male nor female) as ```gender_variance``` only for the sake of this analysis. There are values for ```Age``` that make no sense and so we restrict the ```Age``` column to be between 18 and 90 (and remove all rows that have nonsensical ages). Finally, we replace missing values in ```self_employed``` and ```work_interfere``` with "unknown".
 
 ## How does seeking treatment look relative to the rest of the responses in the survey?
 
@@ -154,7 +154,7 @@ treatment_estimate %>%
   )
 ```
 
-This plot shows all responses to questions and the proportion of respondents who have sought treatment in each response category. 
+This plot shows all responses to questions and the proportion of respondents who have sought treatment in each response category. The different sizes of the points indicate the number of people who had that particular response as well as said 'Yes'to the treatment question.
 
 Example of interpretation: 83% of employees in the survey who felt their mental illness often interferes with their work (```work_interfere``` addresses this question) have sought treatment for mental health. We can also see that many respondents with a family history (```family_history```) of mental illness as well as those who face difficulties in getting leave due to mental health issues (```leave```) have higher occurence in seeking treatment for mental health in the survey. 
 
