@@ -72,7 +72,7 @@
                     </h1>
                     <h2 class="headline">
                     Jan 3, 2018 00:00
-                    · 2777 words
+                    · 2809 words
                     · 14 minute read
                       <span class="tags">
                       
@@ -197,20 +197,19 @@ skimr::skim(mental_health)</code></pre>
 ## Variable type: numeric 
 ##   variable missing complete    n  mean   sd min p25 median p75 max     hist
 ## 1      Age       0     1251 1251 32.08 7.29  18  27     31  36  72 ▂▇▆▂▁▁▁▁</code></pre>
-<p>We can ignore a few columns like <code>state</code>, <code>comments</code> and <code>Timestamp</code> since they do not provide much benefit in the analysis. While I really appreciate the survey keeping gender as a free response, employees with gender variance form a very small subset of the data, hence we can club everyone with variability in their gender(neither male nor female) as <code>gender_variance</code> only for the sake of this analysis. There are values for <code>Age</code> that make no sense and so we restrict the <code>Age</code> column to be between 18 and 90 (and remove all rows that have nonsensical ages). Finally, we replace missing values in <code>self_employed</code> and <code>work_interference</code> with “unknown”.</p>
+<p>We can ignore a few columns like <code>state</code>, <code>comments</code> and <code>Timestamp</code> since they do not provide much benefit in the analysis. While I really appreciate the survey keeping gender as a free response, employees with gender variance form a very small subset of the data, hence we can club everyone with variability in their gender(neither male nor female) as <code>gender_variance</code> only for the sake of this analysis. There are values for <code>Age</code> that make no sense and so we restrict the <code>Age</code> column to be between 18 and 90 (and remove all rows that have nonsensical ages). Finally, we replace missing values in <code>self_employed</code> and <code>work_interfere</code> with “unknown”.</p>
 </div>
 <div id="how-does-seeking-treatment-look-relative-to-the-rest-of-the-responses-in-the-survey" class="section level2">
 <h2>How does seeking treatment look relative to the rest of the responses in the survey?</h2>
 <p>Since many variables in the survey data are categorical, we can’t do a lot of ‘sexy’, numerical analysis. However, response counts (and proportions) can serve as a valuable variable in terms of insight.</p>
 <p>Let’s take the <code>treatment</code> variable for example, it corresponds to the question, <strong>Have you sought treatment for a mental health condition?</strong>:</p>
 <pre class="r"><code>mental_health %&gt;%
-  count(benefits)</code></pre>
-<pre><code>## # A tibble: 3 x 2
-##   benefits       n
-##   &lt;chr&gt;      &lt;int&gt;
-## 1 Don&#39;t know   407
-## 2 No           371
-## 3 Yes          473</code></pre>
+  count(treatment)</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   treatment     n
+##   &lt;chr&gt;     &lt;int&gt;
+## 1 No          619
+## 2 Yes         632</code></pre>
 <p>It looks fairly balanced in terms of diversity in responses, no unknowns. We can look at differences in how employees who have been treated for mental health issues responded to some of the questions on the survey:</p>
 <pre class="r"><code>treatment &lt;- mental_health %&gt;%
   gather(Gender, self_employed, family_history, work_interfere, remote_work:obs_consequence, key = &quot;question&quot;, value = &quot;response&quot;) %&gt;%
@@ -301,7 +300,7 @@ treatment_estimate</code></pre>
   scale_x_continuous(sec.axis = dup_axis(), labels = scales::percent_format(), limits = c(0, 0.9), breaks = seq(0, 0.9, by = 0.1)) +
   scale_size_continuous(range = c(2,6)) +
   labs (
-    title = &quot;Responses of employees who have\nreceived treatment for mental health&quot;,
+    title = &quot;Responses of employees who have\nsought treatment for mental health&quot;,
     subtitle = &quot;Based on responses of the OSMI mental health survey, 2014.\nMinimum 100 employees in each response category.\nIntervals are 95% credible.&quot;,
     y = &quot;Responses&quot;,
     x = &quot;people who sought treatment/total people in response category&quot;,
@@ -309,7 +308,7 @@ treatment_estimate</code></pre>
     size = &quot;Number of respondents&quot;
   )</code></pre>
 <p><img src="/post/2018-01-01-osmi-mental-health-in-tech-survey-data_files/figure-html/estimate_plot-1.png" width="1800" /></p>
-<p>This plot shows all responses to questions and the proportion of respondents who have sought treatment in each response category.</p>
+<p>This plot shows all responses to questions and the proportion of respondents who have sought treatment in each response category. The different sizes of the points indicate the number of people who had that particular response as well as said ’Yes’to the treatment question.</p>
 <p>Example of interpretation: 83% of employees in the survey who felt their mental illness often interferes with their work (<code>work_interfere</code> addresses this question) have sought treatment for mental health. We can also see that many respondents with a family history (<code>family_history</code>) of mental illness as well as those who face difficulties in getting leave due to mental health issues (<code>leave</code>) have higher occurence in seeking treatment for mental health in the survey.</p>
 </div>
 <div id="alternative-visualization" class="section level2">
@@ -343,7 +342,7 @@ treatment_estimate %&gt;%
   scale_x_continuous(labels = scales::percent_format(), limits = c(0, 1), breaks = seq(0, 1, by = 0.25)) +
   scale_size_continuous(range = c(2,5)) +
   labs (
-    title = &quot;Responses of employees who have\nreceived treatment for mental health&quot;,
+    title = &quot;Responses of employees who have\nsought treatment for mental health&quot;,
     subtitle = &quot;Based on responses of the OSMI mental health survey, 2014.\nMinimum 100 employees in each response category.\nIntervals are 95% credible.&quot;,
     y = &quot;Responses&quot;,
     x = &quot;people who sought treatment/total people in response category&quot;,
@@ -366,6 +365,7 @@ treatment_estimate %&gt;%
 <li>Anything you can think of, the data is all present <a href="https://www.kaggle.com/osmi/mental-health-in-tech-survey/data">here</a> along with the new, 2016 survey results which can be found <a href="https://www.kaggle.com/osmi/mental-health-in-tech-2016/data">here</a></li>
 </ol>
 <p>I hope you enjoyed reading this analysis, it is my hope to continue writing more data-driven posts in the future as I have mentioned countless times in the past to be the major reason behind this website. I wish everyone a happy 2018!</p>
+<p>You can check out the R code used to write this post <a href="https://github.com/kanishkamisra/blog">here</a></p>
 </div>
 
                 </section>
