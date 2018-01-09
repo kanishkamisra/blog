@@ -1,0 +1,289 @@
+---
+title: Attitudes of employees towards mental health in the tech workplace
+description: Tidying and analyzing data from the OSMI Mental Health in Tech survey - 2014
+author: Kanishka
+date: '2018-01-03'
+slug: osmi-mental-health-in-tech-survey-data
+categories: []
+tags:
+  - ggplot2
+  - mental health
+  - survey data
+---
+
+
+
+<p>Understanding and accepting mental health as an issue at the workplace has become ever so crucial in recent times. Mental illnesses like depression and anxiety can have a significant economic impact; the estimated cost to the global economy is US$ 1 trillion per year in lost productivity (<a href="http://www.who.int/mental_health/in_the_workplace/en/">source</a>). Open Sourcing Mental Illness (<a href="https://osmihelp.org/">OSMI</a>) is a non profit organization that focuses on raising awareness, education and providing resources to support mental wellness at workplaces, especially in the tech industry. In 2014, they conducted their first ever survey which had questions pertaining to how mental health is perceived at tech workplaces by employees and their employers.</p>
+<p>This survey had over 1200 responses and the data from these responses was made public, which gives us an interesting opportunity to analyze the attitudes of tech-workers from 48 different countries towards mental health.</p>
+<div id="loading-libraries-and-data" class="section level2">
+<h2>Loading libraries and data</h2>
+<p>Let’s load libraries important for this analysis as well as the data which can be downloaded from kaggle: <a href="https://www.kaggle.com/osmi/mental-health-in-tech-survey/data">here</a></p>
+<pre class="r"><code>library(tidyverse)
+library(ebbr)
+
+mental_health &lt;- read_csv(&quot;../../static/data/mental-health.csv&quot;)
+
+skimr::skim(mental_health)</code></pre>
+<pre><code>## Skim summary statistics
+##  n obs: 1259 
+##  n variables: 27 
+## 
+## Variable type: character 
+##                     variable missing complete    n min  max empty n_unique
+## 1                  anonymity       0     1259 1259   2   10     0        3
+## 2                   benefits       0     1259 1259   2   10     0        3
+## 3               care_options       0     1259 1259   2    8     0        3
+## 4                   comments    1096      163 1259   1 3548     0      159
+## 5                    Country       0     1259 1259   5   22     0       48
+## 6                  coworkers       0     1259 1259   2   12     0        3
+## 7             family_history       0     1259 1259   2    3     0        2
+## 8                     Gender       0     1259 1259   1   46     0       47
+## 9                      leave       0     1259 1259   9   18     0        5
+## 10 mental_health_consequence       0     1259 1259   2    5     0        3
+## 11   mental_health_interview       0     1259 1259   2    5     0        3
+## 12        mental_vs_physical       0     1259 1259   2   10     0        3
+## 13              no_employees       0     1259 1259   3   14     0        6
+## 14           obs_consequence       0     1259 1259   2    3     0        2
+## 15   phys_health_consequence       0     1259 1259   2    5     0        3
+## 16     phys_health_interview       0     1259 1259   2    5     0        3
+## 17               remote_work       0     1259 1259   2    3     0        2
+## 18                 seek_help       0     1259 1259   2   10     0        3
+## 19             self_employed      18     1241 1259   2    3     0        2
+## 20                     state     515      744 1259   2    2     0       45
+## 21                supervisor       0     1259 1259   2   12     0        3
+## 22              tech_company       0     1259 1259   2    3     0        2
+## 23                 treatment       0     1259 1259   2    3     0        2
+## 24          wellness_program       0     1259 1259   2   10     0        3
+## 25            work_interfere     264      995 1259   5    9     0        4
+## 
+## Variable type: numeric 
+##   variable missing complete    n    mean      sd   min p25 median p75   max
+## 1      Age       0     1259 1259 7.9e+07 2.8e+09 -1726  27     31  36 1e+11
+##       hist
+## 1 ▇▁▁▁▁▁▁▁
+## 
+## Variable type: POSIXct 
+##    variable missing complete    n        min        max     median n_unique
+## 1 Timestamp       0     1259 1259 2014-08-27 2016-02-01 2014-08-28     1246</code></pre>
+<p>The <code>skimr</code> package really helps in showing a human-readable, compact summary overview of the data which allows identifying missing values in columns among the other benefits it provides.</p>
+<p>The data is mostly categorical and in fact includes all responses to questions that correspond to the column names. The column names obviously do not look like questions, but this is because the maintainers of the data have assigned each question a column name and this list can be found <a href="https://www.kaggle.com/osmi/mental-health-in-tech-survey">here</a>. There are columns with missing data, columns with bizzare values, and columns with values that we can group together (<code>Gender</code>). We can now start our adventure in exploring this data by tidying up these columns.</p>
+<pre class="r"><code>mental_health &lt;- mental_health  %&gt;%
+  select(-c(state, comments, Timestamp)) %&gt;%
+  filter(between(Age, 18, 90)) %&gt;%
+  mutate(
+    Gender = case_when(
+      str_detect(Gender, regex(&quot;trans|fluid|androgynous&quot;, ignore_case = T)) == T ~ &quot;gender_variance&quot;,
+      str_detect(Gender, regex(&quot;female|femail|f|woman|femake&quot;, ignore_case = T)) == T ~ &quot;female&quot;,
+      str_detect(Gender, regex(&quot;mal*|m|mail|man|guy&quot;, ignore_case = T)) == T ~ &quot;male&quot;,
+      TRUE ~ &quot;gender_variance&quot;
+    )
+  ) %&gt;%
+  replace_na(list(
+    self_employed = &quot;unknown&quot;,
+    work_interfere = &quot;unknown&quot;
+  ))
+
+skimr::skim(mental_health)</code></pre>
+<pre><code>## Skim summary statistics
+##  n obs: 1251 
+##  n variables: 24 
+## 
+## Variable type: character 
+##                     variable missing complete    n min max empty n_unique
+## 1                  anonymity       0     1251 1251   2  10     0        3
+## 2                   benefits       0     1251 1251   2  10     0        3
+## 3               care_options       0     1251 1251   2   8     0        3
+## 4                    Country       0     1251 1251   5  22     0       46
+## 5                  coworkers       0     1251 1251   2  12     0        3
+## 6             family_history       0     1251 1251   2   3     0        2
+## 7                     Gender       0     1251 1251   4  15     0        3
+## 8                      leave       0     1251 1251   9  18     0        5
+## 9  mental_health_consequence       0     1251 1251   2   5     0        3
+## 10   mental_health_interview       0     1251 1251   2   5     0        3
+## 11        mental_vs_physical       0     1251 1251   2  10     0        3
+## 12              no_employees       0     1251 1251   3  14     0        6
+## 13           obs_consequence       0     1251 1251   2   3     0        2
+## 14   phys_health_consequence       0     1251 1251   2   5     0        3
+## 15     phys_health_interview       0     1251 1251   2   5     0        3
+## 16               remote_work       0     1251 1251   2   3     0        2
+## 17                 seek_help       0     1251 1251   2  10     0        3
+## 18             self_employed       0     1251 1251   2   7     0        3
+## 19                supervisor       0     1251 1251   2  12     0        3
+## 20              tech_company       0     1251 1251   2   3     0        2
+## 21                 treatment       0     1251 1251   2   3     0        2
+## 22          wellness_program       0     1251 1251   2  10     0        3
+## 23            work_interfere       0     1251 1251   5   9     0        5
+## 
+## Variable type: numeric 
+##   variable missing complete    n  mean   sd min p25 median p75 max     hist
+## 1      Age       0     1251 1251 32.08 7.29  18  27     31  36  72 ▂▇▆▂▁▁▁▁</code></pre>
+<p>We can ignore a few columns like <code>state</code>, <code>comments</code> and <code>Timestamp</code> since they do not provide much benefit in the analysis. While I really appreciate the survey keeping gender as a free response, employees with gender variance form a very small subset of the data, hence we can club everyone with variability in their gender(neither male nor female) as <code>gender_variance</code> only for the sake of this analysis. There are values for <code>Age</code> that make no sense and so we restrict the <code>Age</code> column to be between 18 and 90 (and remove all rows that have nonsensical ages). Finally, we replace missing values in <code>self_employed</code> and <code>work_interfere</code> with “unknown”.</p>
+</div>
+<div id="how-does-seeking-treatment-look-relative-to-the-rest-of-the-responses-in-the-survey" class="section level2">
+<h2>How does seeking treatment look relative to the rest of the responses in the survey?</h2>
+<p>Since many variables in the survey data are categorical, we can’t do a lot of ‘sexy’, numerical analysis. However, response counts (and proportions) can serve as a valuable variable in terms of insight.</p>
+<p>Let’s take the <code>treatment</code> variable for example, it corresponds to the question, <strong>Have you sought treatment for a mental health condition?</strong>:</p>
+<pre class="r"><code>mental_health %&gt;%
+  count(treatment)</code></pre>
+<pre><code>## # A tibble: 2 x 2
+##   treatment     n
+##   &lt;chr&gt;     &lt;int&gt;
+## 1 No          619
+## 2 Yes         632</code></pre>
+<p>It looks fairly balanced in terms of diversity in responses, no unknowns. We can look at differences in how employees who have been treated for mental health issues responded to some of the questions on the survey:</p>
+<pre class="r"><code>treatment &lt;- mental_health %&gt;%
+  gather(Gender, self_employed, family_history, work_interfere, remote_work:obs_consequence, key = &quot;question&quot;, value = &quot;response&quot;) %&gt;%
+  select(question, response, treatment) %&gt;%
+  count(question, response, treatment) %&gt;%
+  spread(treatment, n) %&gt;%
+  mutate(total = No + Yes)
+
+treatment %&gt;%
+  arrange(-Yes/total)</code></pre>
+<pre><code>## # A tibble: 60 x 5
+##    question        response              No   Yes total
+##    &lt;chr&gt;           &lt;chr&gt;              &lt;int&gt; &lt;int&gt; &lt;int&gt;
+##  1 work_interfere  Often                 21   119   140
+##  2 Gender          gender_variance        3    12    15
+##  3 work_interfere  Sometimes            107   357   464
+##  4 family_history  Yes                  127   362   489
+##  5 work_interfere  Rarely                51   122   173
+##  6 obs_consequence Yes                   56   125   181
+##  7 care_options    Yes                  136   303   439
+##  8 Gender          female                77   170   247
+##  9 leave           Very difficult        31    66    97
+## 10 leave           Somewhat difficult    44    81   125
+## # ... with 50 more rows</code></pre>
+<p>This gives us proportions of treatment responses (Yes/No) within each response for each categorical question, we can now apply some statistical techniques to estimate what proportion an employee would say ‘Yes’ to the “Have you sought treatment for a mental health condition?” question.</p>
+<p>One method that we can use is known as <strong>empirical bayes estimation</strong>. <a href="https://twitter.com/drob">David Robinson</a> gives an amazing introduction and explanation in his series about Empirical Bayes which starts with <a href="http://varianceexplained.org/statistics/beta_distribution_and_baseball/">this post</a>. We can treat the variable formed by dividing <code>Yes</code> by <code>total</code>, or the fraction of times “yes” is the response to the treatment question as the variable to estimate using the empirical bayes method. But first, let’s look at the distribution of <code>Yes</code>:</p>
+<pre class="r"><code>treatment %&gt;%
+  mutate(yes_prop = Yes/total) %&gt;%
+  ggplot(aes(yes_prop)) +
+  geom_histogram(fill = &quot;#bd1550&quot;) + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = &quot;bold&quot;, size = rel(1.8), family = &quot;Merriweather&quot;),
+    plot.subtitle = element_text(size = rel(1.2), family = &quot;Merriweather Light&quot;, margin = margin(0,0,20,0)),
+    text = element_text(family = &quot;Noto Sans CJK JP Light&quot;),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text.x = element_text(size = rel(1.2)),
+    plot.caption = element_text(margin = margin(10, 0, 0, 0))
+  ) +
+  labs(
+    title = &quot;Distribution of proportions of employees \nseeking treatment for mental health&quot;,
+    subtitle = &quot;Within responses to other questions\nin the OSMI mental health survey data&quot;,
+    x = &quot;Proportion of employees who have sought treatment for mental health&quot;
+  )</code></pre>
+<p><img src="/posts/2018-01-03-attitudes-of-employees-towards-mental-health-in-the-tech-workplace_files/figure-html/yes_plot-1.png" width="1260" /> Since this plot shows a probability distribution of rates, we can fit a beta distribution which takes evidence from the data as prior beliefs. All this can be done by the <code>ebbr</code> package which will use Bayes’ theorem to to get point estimates and 95% credible intervals for looking at the proportion of ‘Yes’ relative to all responses to the question.</p>
+<pre class="r"><code>treatment_estimate &lt;- treatment %&gt;%
+  add_ebb_estimate(Yes, total) %&gt;%
+  select(question,response, Yes, total, .raw, .fitted, .low, .high)
+
+treatment_estimate</code></pre>
+<pre><code>## # A tibble: 60 x 8
+##    question     response     Yes total  .raw .fitted  .low .high
+##    &lt;chr&gt;        &lt;chr&gt;      &lt;int&gt; &lt;int&gt; &lt;dbl&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+##  1 anonymity    Don&#39;t know   369   815 0.453   0.454 0.420 0.488
+##  2 anonymity    No            37    64 0.578   0.569 0.456 0.678
+##  3 anonymity    Yes          226   372 0.608   0.605 0.556 0.653
+##  4 benefits     Don&#39;t know   151   407 0.371   0.375 0.329 0.422
+##  5 benefits     No           179   371 0.482   0.483 0.434 0.534
+##  6 benefits     Yes          302   473 0.638   0.636 0.592 0.678
+##  7 care_options No           206   499 0.413   0.415 0.373 0.458
+##  8 care_options Not sure     123   313 0.393   0.397 0.345 0.451
+##  9 care_options Yes          303   439 0.690   0.686 0.642 0.728
+## 10 coworkers    No           117   258 0.453   0.456 0.397 0.516
+## # ... with 50 more rows</code></pre>
+<p>We can plot the confidence intervals along with the point estimate for each of the responses, this will result in a very long plot!</p>
+<pre class="r"><code>treatment_estimate %&gt;%
+  mutate(question = paste(question, response, sep = &quot;: &quot;)) %&gt;%
+  mutate(question = reorder(question, .fitted)) %&gt;%
+  filter(total &gt; 100) %&gt;%
+  ggplot(aes(.fitted, question)) + 
+  geom_point(aes(size = total), color = &quot;#8fbc94&quot;) +
+  geom_errorbarh(aes(xmin = .low, xmax = .high), color = &quot;#8fbc94&quot;) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = &quot;bold&quot;, size = rel(2.2), family = &quot;Merriweather&quot;, margin = margin(10, 0, 10, 0), hjust = 0),
+    plot.subtitle = element_text(size = rel(1.5), family = &quot;Merriweather Light&quot;, margin = margin(0,0,30,0)),
+    text = element_text(family = &quot;Noto Sans CJK JP Light&quot;),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0), size = rel(1.3)),
+    axis.text.x = element_text(size = rel(1.4)),
+    plot.caption = element_text(margin = margin(10, 0, 0, 0), size = rel(1.2)),
+    axis.title.x.top = element_text(margin = margin(0, 0, 20, 0)),
+    axis.title.y = element_text(size = rel(1.3)),
+    axis.text.y = element_text(size = rel(1.4)),
+    legend.position = &quot;top&quot;,
+    legend.title = element_text(size = rel(1.3)),
+    legend.text = element_text(size = rel(1.1))
+  ) +
+  scale_x_continuous(sec.axis = dup_axis(), labels = scales::percent_format(), limits = c(0, 0.9), breaks = seq(0, 0.9, by = 0.1)) +
+  scale_size_continuous(range = c(2,6)) +
+  labs (
+    title = &quot;Responses of employees who have\nsought treatment for mental health&quot;,
+    subtitle = &quot;Based on responses of the OSMI mental health survey, 2014.\nMinimum 100 employees in each response category.\nIntervals are 95% credible.&quot;,
+    y = &quot;Responses&quot;,
+    x = &quot;people who sought treatment/total people in response category&quot;,
+    caption = &quot;Source: Kaggle&quot;,
+    size = &quot;Number of respondents&quot;
+  )</code></pre>
+<p><img src="/posts/2018-01-03-attitudes-of-employees-towards-mental-health-in-the-tech-workplace_files/figure-html/estimate_plot-1.png" width="1800" /></p>
+<p>This plot shows all responses to questions and the proportion of respondents who have sought treatment in each response category. The different sizes of the points indicate the number of people who had that particular response as well as said ’Yes’to the treatment question.</p>
+<p>Example of interpretation: 83% of employees in the survey who felt their mental illness often interferes with their work (<code>work_interfere</code> addresses this question) have sought treatment for mental health. We can also see that many respondents with a family history (<code>family_history</code>) of mental illness as well as those who face difficulties in getting leave due to mental health issues (<code>leave</code>) have higher occurence in seeking treatment for mental health in the survey.</p>
+</div>
+<div id="alternative-visualization" class="section level2">
+<h2>Alternative visualization</h2>
+<p>A better way to look at this same plot is separating it by questions so that identifying responses with higher amounts of treatment-seekers becomes more apparent. I have also parsed the full questions for each variable to show in this plot.</p>
+<pre class="r"><code>questions &lt;- read_delim(&quot;../../static/data/question_response.txt&quot;, &quot;:&quot;)
+
+treatment_estimate %&gt;%
+  inner_join(questions, by = c(&quot;question&quot; = &quot;question_var&quot;)) %&gt;%
+  mutate(response = reorder(response, .fitted)) %&gt;%
+  filter(total &gt; 100) %&gt;%
+  ggplot(aes(.fitted, response)) + 
+  geom_point(aes(size = total), color = &quot;#8fbc94&quot;) +
+  geom_errorbarh(aes(xmin = .low, xmax = .high), color = &quot;#8fbc94&quot;) +
+  facet_wrap(~question_text, scales = &quot;free&quot;, ncol = 2, labeller = labeller(question_text = label_wrap_gen(39))) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = &quot;bold&quot;, size = rel(2.2), family = &quot;Merriweather&quot;, margin = margin(10, 0, 10, 0), hjust = 0),
+    plot.subtitle = element_text(size = rel(1.5), family = &quot;Merriweather Light&quot;, margin = margin(0,0,30,0)),
+    text = element_text(family = &quot;Noto Sans CJK JP Light&quot;),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0), size = rel(1.3)),
+    axis.text.x = element_text(size = rel(1.4)),
+    plot.caption = element_text(margin = margin(10, 0, 0, 0), size = rel(1.2)),
+    axis.title.y = element_text(size = rel(1.3)),
+    axis.text.y = element_text(size = rel(1.4)),
+    legend.position = &quot;top&quot;,
+    legend.title = element_text(size = rel(1.3)),
+    legend.text = element_text(size = rel(1.1)),
+    strip.text = element_text(size = rel(1.1), face = &quot;bold&quot;)
+  ) +
+  scale_x_continuous(labels = scales::percent_format(), limits = c(0, 1), breaks = seq(0, 1, by = 0.25)) +
+  scale_size_continuous(range = c(2,5)) +
+  labs (
+    title = &quot;Responses of employees who have\nsought treatment for mental health&quot;,
+    subtitle = &quot;Based on responses of the OSMI mental health survey, 2014.\nMinimum 100 employees in each response category.\nIntervals are 95% credible.&quot;,
+    y = &quot;Responses&quot;,
+    x = &quot;people who sought treatment/total people in response category&quot;,
+    caption = &quot;Source: Kaggle&quot;,
+    size = &quot;Number of respondents&quot;
+  )</code></pre>
+<p><img src="/posts/2018-01-03-attitudes-of-employees-towards-mental-health-in-the-tech-workplace_files/figure-html/estimate_plot2-1.png" width="1800" /></p>
+<p>Adding the proper question texts as well as splitting the plot for each question really helps understand differences between each response in a given question, relative to the fraction of employees who have sought treatment. Most of the responses that result in higher peoportions of treatment seekers than their alternatives have some sort of an indication towards a negative consequence of work in regards to mental health. For example:</p>
+<ul>
+<li>respondents who feel their <strong>company does not take mental health as seriously as physical health</strong> also accounted for being high in number of treatment seekers.</li>
+<li>the same thing is observed with employees who think <strong>discussing their mental health issues with the employer can have a negative consequence</strong></li>
+</ul>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>Often times an employee with mental health issues will not seek treatment because they fear its effect on their work. In this analysis, we have seen how employees who seek treatment feel about their workplace in relation to their mental health and explored some of the differences in attitudes for other questions in the survey. Analyses similar to the one I have presented can contribute to, or potentially ignite further, much better research about mental health at workplaces. There is a lot more data than what I was able to present here and so there are a number of ideas that can be applied to this data, such as:</p>
+<ol style="list-style-type: decimal">
+<li>Creating a <code>disclosure</code> metric that looks at the extent to which employees can dicuss mental issues with their employers (coworkers, supervisors, and during interview). This can be set up as an ordinal regression problem by making the metric ordinal, like a likert-scale (0-10).</li>
+<li>I have looked at seeking treatment and its proportions across different responses and response categories, the same can be done with any question with complete data (presence of missing variables causes more ambiguity than what is already present in the survey data due to sampling bias, both voluntary and no-response)</li>
+<li>Anything you can think of, the data is all present <a href="https://www.kaggle.com/osmi/mental-health-in-tech-survey/data">here</a> along with the new, 2016 survey results which can be found <a href="https://www.kaggle.com/osmi/mental-health-in-tech-2016/data">here</a></li>
+</ol>
+<p>I hope you enjoyed reading this analysis, it is my hope to continue writing more data-driven posts in the future as I have mentioned countless times in the past to be the major reason behind this website. I wish everyone a happy 2018!</p>
+<p>You can check out the R code used to write this post <a href="https://github.com/kanishkamisra/blog">here</a></p>
+</div>
