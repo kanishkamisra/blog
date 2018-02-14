@@ -1,0 +1,352 @@
+---
+title: Population growth and Doubling times with tidyverse
+description: Modeling and visualizing population growth.
+author: Kanishka
+date: '2018-01-29'
+slug: population-growth-and-doubling-times-with-tidyverse
+categories: []
+tags:
+  - tidyverse
+  - population studies
+  - demographic data
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(kableExtra)
+options(scipen = 99)
+knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE, 
+                      echo = TRUE, dpi = 180)
+```
+
+
+## Background
+
+Ever since I worked on data about populations at my internship at Perscio, a healthcare data analysis firm in Indianapolis, as well as worked with a Professor of Demography and Social Policy on a paper about demographic data, I have gained interest in population problems - mostly through readings.
+
+The best way to restart this journey would be to do so using what population problems often involve: Data analysis. In this post, we define and calculate population growth rates as well as doubling times of several countries and then finally produce intuitive visualizations of these numbers.
+
+## Loading libraries and data
+
+The data used throughout this post is from [United Nations' Population Divison](https://esa.un.org/unpd/wpp/Download/Standard/Population/) and consists of population numbers of all countries between 1970 and 2015 (in intervals of 5 years).
+
+```{r libraries and data}
+library(tidyverse)
+library(kani)
+library(scales)
+library(geofacet)
+
+population_raw <- read_csv("../../static/data/population.csv")
+
+population_raw
+```
+
+The data looks a little weird:
+
+1. It's in a wide format than a long one, each year seems to be a single column.
+2. The population values look to be parsed as characters, this is mostly because I didn't provide any parsing formats to ```read_csv()```
+
+## Tidying data
+
+We can all fix this using some of the helper functions in the ```tidyverse``` package!
+
+```{r tidy data}
+population <- population_raw %>%
+  gather(`1950`:`2015`, key = "year", value = "population") %>%
+  mutate(
+    population = as.numeric(str_replace_all(population, " ", "")),
+    year = as.numeric(year)
+  )
+
+population
+```
+
+Now that the data is more readable, we can look at what each column describes:
+
+1. **Country**: Country names (also contains data about regions and world)
+2. **code**: Country code specified by the UN
+3. **population**: Total population of the country in 1000s
+4. **Year**: .. The year
+
+As an example, we can now plot how the population grew for the world, as well as countries with different income situations:
+
+```{r example plot, fig.height=7}
+population %>%
+  filter(str_detect(Country, "WORLD|income")) %>%
+  ggplot(aes(year, population/1000, group = Country, color = Country)) + 
+  geom_line(size = 1) + 
+  scale_y_continuous(breaks = pretty_breaks(n = 6)) +
+  scale_x_continuous(breaks = pretty_breaks(n = 6)) +
+  scale_color_kani() + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = "bold", size = rel(1.8), family = "Merriweather"),
+    plot.subtitle = element_text(size = rel(1.2), family = "Merriweather Light", margin = margin(0,0,20,0)),
+    text = element_text(family = "Noto Sans CJK JP Light"),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    legend.position = "top",
+    panel.grid.minor = element_blank(),
+    legend.text = element_text(size = rel(0.8))
+  ) + 
+  labs(
+    title = "Population growth rates in countries\ndifferentiated by income",
+    y = "Population per million",
+    x = "Year",
+    color = "",
+    subtitle = "Middle income countries have been experiencing\nhigher population growth than other countries"
+  )
+```
+
+## Population Growth Rate
+
+Studying total population numbers is great, but what's even useful is to look at the *rate* by which the population changes in regions. The population growth rate of a country can be defined as the rate at which the number of individuals changes over a period of time expressed as a percentage of the population at the beginning of that time period.
+
+Mathematically,
+
+\[
+Population\ growth \ rate = \frac{Pop(t_2) - Pop(t_1)}{Pop(t_1)(t_2 - t_1)}
+\]
+
+where,
+
+$t_1$ and $t_2$ are beginning and end times of the time period. In our data these are successive years so the difference is always 1.
+
+and
+
+$Pop(t)$ is the number of individuals at time $t$.
+
+We can use the ```lag()``` function in ```dplyr``` to calculate the yearly growth rate for each country/region in the dataset. As an example, we can see the population growth rate of the world starting from 1950 as shown in this plot:
+
+```{r example growth rate, fig.height=6}
+population %>%
+  filter(Country == "WORLD") %>%
+  mutate(growth_rate = population/lag(population, 1) - 1) %>%
+  ggplot(aes(year, growth_rate)) +
+  geom_line(size = 1, color = "#f15c5c") + 
+  scale_y_continuous(labels = percent_format(), limits = c(0, 0.022)) +
+  scale_x_continuous(breaks = pretty_breaks(n = 6)) + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = "bold", size = rel(1.8), family = "Merriweather"),
+    plot.subtitle = element_text(size = rel(1.2), family = "Merriweather Light", margin = margin(0,0,20,0)),
+    text = element_text(family = "Noto Sans CJK JP Light"),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    panel.grid.minor = element_blank()
+  ) + 
+  labs(
+    x = "Year",
+    y = "Population Growth Rate (%)",
+    title = "Population Growth Rate of the World",
+    subtitle = "Average yearly change in population between 1950-2015"
+  )
+```
+
+But this was for one region in the entire dataset! How can we fit this model for all regions? Easy, we just use ```map()``` from the ```purrr``` package which lets us extend a function to different kinds of groups within the data which in this case are countries/regions. This can be done by first nesting all the yearly population changes for each country as a dataframe, fitting the desired function for each country, and then unnesting to get rates for all countries.
+
+```{r Extend gr to all}
+growth_rate <- function(df) {
+  return(df %>% transmute(growth_rate = population/lag(population, 1) - 1))
+}
+
+population_growth <- population %>%
+  group_by(Country) %>%
+  nest() %>%
+  mutate(growth = map(data, growth_rate)) %>%
+  unnest()
+
+population_growth
+```
+
+Let's look at the first plot in this post, but from the perspective of population growth rate:
+
+```{r growth rates in selected regions, fig.height=8}
+population_growth %>%
+  filter(str_detect(Country, "WORLD|income")) %>%
+  ggplot(aes(year, growth_rate, group = Country, color = Country)) +
+  geom_line(size = 1) + 
+  scale_y_continuous(breaks = seq(0, 0.03, by = 0.005), limits = c(0, 0.03), labels = percent_format()) +
+  scale_x_continuous(breaks = pretty_breaks(n = 6)) +
+  scale_color_kani() + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = "bold", size = rel(1.8), family = "Merriweather"),
+    plot.subtitle = element_text(size = rel(1.2), family = "Merriweather Light", margin = margin(0,0,20,0)),
+    text = element_text(family = "Noto Sans CJK JP Light"),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    legend.position = "top",
+    panel.grid.minor = element_blank(),
+    legend.text = element_text(size = rel(0.8))
+  ) + 
+  labs(
+    title = "Population growth rates in countries\ndifferentiated by income",
+    y = "Population Growth Rate (%)",
+    x = "Year",
+    color = "",
+    subtitle = "As the world population growth rate falls,\nlow income countries are experiencing higher growth rates."
+  )
+```
+
+We see that while the low-income countries line was at the bottom of the chart in the first plot indicating their population numbers havent gone up by much, they still experience the highest percentage changes in their population. Low income counties started at 1.4% growth rate and then jumped up to being the highest in comparison to countries with higher income, 2.7%. This is mostly because of a dual effect: high birth rates and presence of a younger population compared to the rest, but I will most probably explore this further in future posts. 
+
+## Doubling Times
+
+We now focus on doubling times, or the metric which looks at how long does it take for a region to double its population. This is important because the onset of modernity (starting in mid 20th century), something that brought in better standards of living and health has resulted in a rapid population growth, but that historical growth has now slowed down greatly. The peak growth rate was in 1960s at about 2.1% and has since fallen to about half of that. It would be interesting to see how long it took for the population to double in the 60s versus now.
+
+Mathematically, the doubling time for a given year can be given as follows:
+
+\[
+Doubling \ Time = \frac{\ln(2)}{r_t}
+\]
+
+Where $r$ is the growth rate of the region at time $t$. We assume that human population growth follows a exponential curve that explains the $\ln(2)$ component. 
+
+
+We can now use this and fit it to all regions described in the dataset.
+
+```{r doubling_time_fit}
+population_rates <- population_growth %>%
+  group_by(Country) %>%
+  nest() %>%
+  mutate(doubling_time = map(data, function(df) {return(log(2)/df$growth_rate)})) %>%
+  unnest()
+
+population_rates
+```
+
+Let's look at the doubling times of countries based differentiated by income levels as an example:
+
+```{r fig.height=8}
+population_rates %>%
+  filter(str_detect(Country, "WORLD|income")) %>%
+  ggplot(aes(year, doubling_time, group = Country, color = Country)) +
+  geom_line(size = 1) + 
+  scale_y_continuous(breaks = seq(0, 150, by = 25), limits = c(0, 150)) +
+  scale_x_continuous(breaks = pretty_breaks(n = 6)) +
+  scale_color_kani() + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = "bold", size = rel(1.8), family = "Merriweather"),
+    plot.subtitle = element_text(size = rel(1.2), family = "Merriweather Light", margin = margin(0,0,20,0)),
+    text = element_text(family = "Noto Sans CJK JP Light"),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    legend.position = "top",
+    panel.grid.minor = element_blank(),
+    legend.text = element_text(size = rel(0.8))
+  ) + 
+  labs(
+    title = "Population Doubling times in the world",
+    subtitle = "Higher income countries take the longest time to double their\npopulation while the lower income ones take the least time",
+    y = "Doubling time in years",
+    x = "Year",
+    color = ""
+  )
+```
+
+## Visualizing Growth and Doubling Times in Different regions
+
+So far, we've seen growth rates in countries grouped together in bins or buckets based on income levels, what if we wanted to decompose these and actually look at countries? We can always select a bunch of countries and show them in a single graph, or even make separate graphs and show them in the same plot as different boxes using ```facet_wrap()```. 
+
+This is great, but it can also mask regional patterns, what if all Scandinavian countries experienced similar trends? What is an intelligent way to group them together? One way is to manually do it, but this is where the ```geofacet``` package comes into play. With the ```geofacet``` package, one can create a grid as we will see below and pre-define the positions of each country/region so that they can mimic a world map! 
+
+
+As an example, we look at European Countries:
+
+```{r fig.height=13, fig.width=15}
+europe_grid <- data.frame(
+  row = c(1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9),
+  col = c(1, 4, 5, 6, 7, 1, 2, 5, 7, 8, 4, 5, 6, 7, 8, 2, 3, 4, 5, 6, 7, 8, 1, 2, 4, 5, 6, 7, 8, 4, 6, 7, 8, 7, 8, 6, 7, 8),
+  code = c("ISL", "NOR", "SWE", "FIN", "EST", "IRL", "GBR", "DEN", "LAT", "RUS", "NLD", "DEU", "POL", "LTU", "BLR", "FRA", "BEL", "LUX", "AUT", "CZE", "SVK", "UKR", "PRT", "ESP", "CHE", "SVN", "HUN", "ROU", "MDA", "ITA", "HRV", "SRB", "BGR", "MNE", "MKD", "BIH", "ALB", "GRC"),
+  name = c("Iceland", "Norway", "Sweden", "Finland", "Estonia", "Ireland", "United Kingdom", "Denmark", "Latvia", "Russian Federation", "Netherlands", "Germany", "Poland", "Lithuania", "Belarus", "France", "Belgium", "Luxembourg", "Austria", "Czechia", "Slovakia", "Ukraine", "Portugal", "Spain", "Switzerland", "Slovenia", "Hungary", "Romania", "Republic of Moldova", "Italy", "Croatia", "Serbia", "Bulgaria", "Montenegro", "TFYR Macedonia", "Bosnia and Herzegovina", "Albania", "Greece"),
+  stringsAsFactors = FALSE
+)
+
+euro_facets <- population_rates %>%
+  filter(Country %in% europe_grid$name) %>%
+  ggplot(aes(year, growth_rate, group = Country)) + 
+  geom_line(color = "#79bd9a", size = 1) + 
+  scale_y_continuous(labels = percent_format()) +
+  facet_geo(~Country, grid = europe_grid) + 
+  theme_kani() + 
+  theme(
+    plot.title = element_text(face = "bold", size = rel(1.8), family = "Merriweather"),
+    plot.subtitle = element_text(size = rel(1.2), family = "Merriweather Light", margin = margin(0,0,20,0)),
+    text = element_text(family = "Noto Sans CJK JP Light"),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "white"),
+    panel.background = element_rect(fill = "white"),
+    strip.background = element_rect(fill = "white"),
+    strip.text.x = element_text(face = "bold")
+  ) + 
+  labs(
+    title = "Population growth rates in Europe",
+    y = "Population Growth Rate (%)",
+    x = "",
+    color = "",
+    subtitle = "Europe has been facing a bit of a population decline. "
+  )
+
+ggsave("../../static/img/eu_population_growth.png", euro_facets, height = 15, width = 20)
+
+euro_facets
+```
+
+Check [enlarged version](/img/eu_population_growth.png). We see that most of Europe is beginning to enter the population decline phase, there is a small upward trend in some countries, but this is mostly because of the mass-migration. Most of Europe has already entered the phase of population decline.
+
+What about the doubling times in South America?
+
+```{r fig.height=12, fig.width=16}
+south_america_grid <- data.frame(
+  row = c(1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4),
+  col = c(1, 2, 3, 4, 5, 2, 3, 4, 5, 3, 4, 5, 4),
+  code = c("COL", "VEN", "GUY", "SUR", "GUF", "ECU", "PER", "BOL", "BRA", "CHL", "PRY", "URY", "ARG"),
+  name = c("Colombia", "Venezuela (Bolivarian Republic of)", "Guyana", "Suriname", "French Guiana", "Ecuador", "Peru", "Bolivia (Plurinational State of)", "Brazil", "Chile", "Paraguay", "Uruguay", "Argentina"),
+  stringsAsFactors = FALSE
+)
+
+sa_facets <- population_rates %>%
+  filter(Country %in% south_america_grid$name) %>%
+  ggplot(aes(year, doubling_time, group = Country)) + 
+  geom_line(color = "#8283a7", size = 1) + 
+  scale_x_continuous(breaks = seq(1950, 2010, length = 5)) +
+  scale_y_continuous(breaks = pretty_breaks(7)) +
+  facet_geo(~Country, grid = south_america_grid, scales = "free") + 
+  theme_kani() + 
+  theme(
+    plot.title = element_text(face = "bold", size = rel(1.8), family = "Merriweather"),
+    plot.subtitle = element_text(size = rel(1.2), family = "Merriweather Light", margin = margin(0,0,20,0)),
+    text = element_text(family = "Noto Sans CJK JP Light"),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "white"),
+    panel.background = element_rect(fill = "white"),
+    strip.background = element_rect(fill = "white"),
+    strip.text.x = element_text(face = "bold", size = rel(1.1))
+  ) + 
+  labs(
+    title = "Population Doubling Times in South America",
+    x = "",
+    y = "Doubling Time in years",
+    color = "",
+    subtitle = "More stable trend for larger countries, less so for the smaller ones"
+  )
+
+ggsave("../../static/img/sa_doubling.png", sa_facets, height = 12, width = 16)
+
+sa_facets
+```
+
+Check [enlarged version](/img/sa_doubling.png). The population boom between 60s and 80s did affect most of South America since there was a decline in the doubling times (for at least the larger countries, by size). This was also a time when the fastest doubling of the world population happened, from 2.5 billion people to 5 billion people in just 37 years (1950 - 1987)! The UN projections with the most likely scenario (SSP2) indicate that by 2088, it will take another 100 years for the world population to double (Our World in Data, 2015).
+
+
+## Conclusion
+
+This was a simple post that introduces some helpful rates and measures to understand population change in the world. The visualizations in the post showed how countries with different income levels (as categorized by the UN) differ in their respective population growth rates as well as doubling times, and then we further decomposed these groupings by plotting the country specific measures using ```geofacet```. 
+
+It is exciting to see what the future holds in terms of population changes and hope to continue working with more complex demographic data to produce interesting analyses to blog about! I am very happy to get feedback on this post so please reach out to me via [Twitter](https://twitter.com/iamasharkskin) if you have any comments to make!

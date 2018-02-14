@@ -6,10 +6,19 @@
     <description>Recent content in Tags on Kanishka Misra</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Wed, 03 Jan 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 29 Jan 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/tags/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Demographic Data</title>
+      <link>/tags/demographic-data/</link>
+      <pubDate>Mon, 29 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/demographic-data/</guid>
+      <description></description>
+    </item>
     
     <item>
       <title>Ggplot2</title>
@@ -30,11 +39,29 @@
     </item>
     
     <item>
+      <title>Population Studies</title>
+      <link>/tags/population-studies/</link>
+      <pubDate>Mon, 29 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/population-studies/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Survey Data</title>
       <link>/tags/survey-data/</link>
       <pubDate>Wed, 03 Jan 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/survey-data/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Tidyverse</title>
+      <link>/tags/tidyverse/</link>
+      <pubDate>Mon, 29 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tidyverse/</guid>
       <description></description>
     </item>
     

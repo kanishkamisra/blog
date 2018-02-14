@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		 
+			
+  
+    <meta name="twitter:card" content="summary"/>
+    
+      <meta name="twitter:image" content="/images/avatar.png" />
+    
+  
+  
+  <meta name="twitter:title" content="Population growth and Doubling times with tidyverse"/>
+  <meta name="twitter:description" content="Modeling and visualizing population growth."/>
+  
+    <meta name="twitter:site" content="@iamasharkskin"/>
+  
+  
+  
+  
+    <meta name="twitter:creator" content="@Kanishka Misra"/>
+  
+
+
+
+		
+		<meta name="author" content="Kanishka Misra">
+		<meta name="description" content="Blog about Kanishka&#39;s Data Projects">
+		<meta name="generator" content="Hugo 0.31.1" />
+		<title>Population growth and Doubling times with tidyverse &middot; Kanishka Misra</title>
+		<link rel="shortcut icon" href="/images/favicon.ico">
+		<link rel="stylesheet" href="/css/style.css">
+		<link rel="stylesheet" href="/css/highlight.css">
+		
+
+		
+		<link rel="stylesheet" href="/css/font-awesome.min.css">
+		
+
+		
+		<link href="/index.xml" rel="alternate" type="application/rss+xml" title="Kanishka Misra" />
+		
+
+		
+	</head>
+    <body>
+       <nav class="main-nav">
+	
+	
+		<a href='/'> <span class="arrow">←</span>Home</a>
+	
+	<a href='/posts'>Archive</a>
+	<a href='/tags'>Tags</a>
+	<a href='/about'>About</a>
+
+	
+
+	
+	<a class="cta" href="/index.xml">Subscribe</a>
+	
+</nav>
+
+
+        <section id="wrapper" class="post">
+            <article>
+                <header>
+                    <h1>
+                        Population growth and Doubling times with tidyverse
+                    </h1>
+                    <h2 class="headline">
+                    Jan 29, 2018 00:00
+                    · 3056 words
+                    · 15 minute read
+                      <span class="tags">
+                      
+                      
+                          
+                              <a href="/tags/tidyverse">tidyverse</a>
+                          
+                              <a href="/tags/population-studies">population studies</a>
+                          
+                              <a href="/tags/demographic-data">demographic data</a>
+                          
+                      
+                      
+                      </span>
+                    </h2>
+                </header>
+                
+                  
+                
+                <section id="post-body">
+                    <div id="background" class="section level2">
+<h2>Background</h2>
+<p>Ever since I worked on data about populations at my internship at Perscio, a healthcare data analysis firm in Indianapolis, as well as worked with a Professor of Demography and Social Policy on a paper about demographic data, I have gained interest in population problems - mostly through readings.</p>
+<p>The best way to restart this journey would be to do so using what population problems often involve: Data analysis. In this post, we define and calculate population growth rates as well as doubling times of several countries and then finally produce intuitive visualizations of these numbers.</p>
+</div>
+<div id="loading-libraries-and-data" class="section level2">
+<h2>Loading libraries and data</h2>
+<p>The data used throughout this post is from <a href="https://esa.un.org/unpd/wpp/Download/Standard/Population/">United Nations’ Population Divison</a> and consists of population numbers of all countries between 1970 and 2015 (in intervals of 5 years).</p>
+<pre class="r"><code>library(tidyverse)
+library(kani)
+library(scales)
+library(geofacet)
+
+population_raw &lt;- read_csv(&quot;../../static/data/population.csv&quot;)
+
+population_raw</code></pre>
+<pre><code>## # A tibble: 273 x 68
+##    Country    code `1950` `1951` `1952` `1953` `1954` `1955` `1956` `1957`
+##    &lt;chr&gt;     &lt;int&gt; &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt;  &lt;chr&gt; 
+##  1 WORLD       900 2 536… 2 583… 2 630… 2 677… 2 724… 2 772… 2 821… 2 871…
+##  2 More dev…   901 814 8… 824 2… 834 0… 844 2… 854 6… 865 0… 875 5… 885 9…
+##  3 Less dev…   902 1 721… 1 759… 1 796… 1 832… 1 869… 1 907… 1 945… 1 986…
+##  4 Least de…   941 195 2… 199 0… 202 9… 206 8… 211 0… 215 4… 220 0… 224 8…
+##  5 Less dev…   934 1 526… 1 560… 1 593… 1 626… 1 658… 1 691… 1 725… 1 761…
+##  6 Less dev…   948 1 157… 1 179… 1 203… 1 229… 1 256… 1 284… 1 314… 1 344…
+##  7 High-inc…  1503 672 8… 680 6… 688 8… 697 4… 706 2… 715 2… 724 3… 733 4…
+##  8 Middle-i…  1517 1 734… 1 772… 1 808… 1 844… 1 880… 1 916… 1 954… 1 992…
+##  9 Upper-mi…  1502 956 2… 980 1… 1 001… 1 022… 1 041… 1 060… 1 079… 1 099…
+## 10 Lower-mi…  1501 778 2… 792 1… 807 0… 822 6… 839 1… 856 4… 874 4… 893 2…
+## # ... with 263 more rows, and 58 more variables: `1958` &lt;chr&gt;,
+## #   `1959` &lt;chr&gt;, `1960` &lt;chr&gt;, `1961` &lt;chr&gt;, `1962` &lt;chr&gt;, `1963` &lt;chr&gt;,
+## #   `1964` &lt;chr&gt;, `1965` &lt;chr&gt;, `1966` &lt;chr&gt;, `1967` &lt;chr&gt;, `1968` &lt;chr&gt;,
+## #   `1969` &lt;chr&gt;, `1970` &lt;chr&gt;, `1971` &lt;chr&gt;, `1972` &lt;chr&gt;, `1973` &lt;chr&gt;,
+## #   `1974` &lt;chr&gt;, `1975` &lt;chr&gt;, `1976` &lt;chr&gt;, `1977` &lt;chr&gt;, `1978` &lt;chr&gt;,
+## #   `1979` &lt;chr&gt;, `1980` &lt;chr&gt;, `1981` &lt;chr&gt;, `1982` &lt;chr&gt;, `1983` &lt;chr&gt;,
+## #   `1984` &lt;chr&gt;, `1985` &lt;chr&gt;, `1986` &lt;chr&gt;, `1987` &lt;chr&gt;, `1988` &lt;chr&gt;,
+## #   `1989` &lt;chr&gt;, `1990` &lt;chr&gt;, `1991` &lt;chr&gt;, `1992` &lt;chr&gt;, `1993` &lt;chr&gt;,
+## #   `1994` &lt;chr&gt;, `1995` &lt;chr&gt;, `1996` &lt;chr&gt;, `1997` &lt;chr&gt;, `1998` &lt;chr&gt;,
+## #   `1999` &lt;chr&gt;, `2000` &lt;chr&gt;, `2001` &lt;chr&gt;, `2002` &lt;chr&gt;, `2003` &lt;chr&gt;,
+## #   `2004` &lt;chr&gt;, `2005` &lt;chr&gt;, `2006` &lt;chr&gt;, `2007` &lt;chr&gt;, `2008` &lt;chr&gt;,
+## #   `2009` &lt;chr&gt;, `2010` &lt;chr&gt;, `2011` &lt;chr&gt;, `2012` &lt;chr&gt;, `2013` &lt;chr&gt;,
+## #   `2014` &lt;chr&gt;, `2015` &lt;chr&gt;</code></pre>
+<p>The data looks a little weird:</p>
+<ol style="list-style-type: decimal">
+<li>It’s in a wide format than a long one, each year seems to be a single column.</li>
+<li>The population values look to be parsed as characters, this is mostly because I didn’t provide any parsing formats to <code>read_csv()</code></li>
+</ol>
+</div>
+<div id="tidying-data" class="section level2">
+<h2>Tidying data</h2>
+<p>We can all fix this using some of the helper functions in the <code>tidyverse</code> package!</p>
+<pre class="r"><code>population &lt;- population_raw %&gt;%
+  gather(`1950`:`2015`, key = &quot;year&quot;, value = &quot;population&quot;) %&gt;%
+  mutate(
+    population = as.numeric(str_replace_all(population, &quot; &quot;, &quot;&quot;)),
+    year = as.numeric(year)
+  )
+
+population</code></pre>
+<pre><code>## # A tibble: 18,018 x 4
+##    Country                                           code  year population
+##    &lt;chr&gt;                                            &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt;
+##  1 WORLD                                              900  1950    2536275
+##  2 More developed regions                             901  1950     814865
+##  3 Less developed regions                             902  1950    1721410
+##  4 Least developed countries                          941  1950     195259
+##  5 Less developed regions, excluding least develop…   934  1950    1526151
+##  6 Less developed regions, excluding China            948  1950    1157197
+##  7 High-income countries                             1503  1950     672896
+##  8 Middle-income countries                           1517  1950    1734481
+##  9 Upper-middle-income countries                     1502  1950     956204
+## 10 Lower-middle-income countries                     1501  1950     778277
+## # ... with 18,008 more rows</code></pre>
+<p>Now that the data is more readable, we can look at what each column describes:</p>
+<ol style="list-style-type: decimal">
+<li><strong>Country</strong>: Country names (also contains data about regions and world)</li>
+<li><strong>code</strong>: Country code specified by the UN</li>
+<li><strong>population</strong>: Total population of the country in 1000s</li>
+<li><strong>Year</strong>: .. The year</li>
+</ol>
+<p>As an example, we can now plot how the population grew for the world, as well as countries with different income situations:</p>
+<pre class="r"><code>population %&gt;%
+  filter(str_detect(Country, &quot;WORLD|income&quot;)) %&gt;%
+  ggplot(aes(year, population/1000, group = Country, color = Country)) + 
+  geom_line(size = 1) + 
+  scale_y_continuous(breaks = pretty_breaks(n = 6)) +
+  scale_x_continuous(breaks = pretty_breaks(n = 6)) +
+  scale_color_kani() + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = &quot;bold&quot;, size = rel(1.8), family = &quot;Merriweather&quot;),
+    plot.subtitle = element_text(size = rel(1.2), family = &quot;Merriweather Light&quot;, margin = margin(0,0,20,0)),
+    text = element_text(family = &quot;Noto Sans CJK JP Light&quot;),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    legend.position = &quot;top&quot;,
+    panel.grid.minor = element_blank(),
+    legend.text = element_text(size = rel(0.8))
+  ) + 
+  labs(
+    title = &quot;Population growth rates in countries\ndifferentiated by income&quot;,
+    y = &quot;Population per million&quot;,
+    x = &quot;Year&quot;,
+    color = &quot;&quot;,
+    subtitle = &quot;Middle income countries have been experiencing\nhigher population growth than other countries&quot;
+  )</code></pre>
+<p><img src="/posts/2018-01-29-population-growth-and-doubling-times-with-tidyverse_files/figure-html/example%20plot-1.png" width="1260" /></p>
+</div>
+<div id="population-growth-rate" class="section level2">
+<h2>Population Growth Rate</h2>
+<p>Studying total population numbers is great, but what’s even useful is to look at the <em>rate</em> by which the population changes in regions. The population growth rate of a country can be defined as the rate at which the number of individuals changes over a period of time expressed as a percentage of the population at the beginning of that time period.</p>
+<p>Mathematically,</p>
+<p><span class="math display">\[
+Population\ growth \ rate = \frac{Pop(t_2) - Pop(t_1)}{Pop(t_1)(t_2 - t_1)}
+\]</span></p>
+<p>where,</p>
+<p><span class="math inline">\(t_1\)</span> and <span class="math inline">\(t_2\)</span> are beginning and end times of the time period. In our data these are successive years so the difference is always 1.</p>
+<p>and</p>
+<p><span class="math inline">\(Pop(t)\)</span> is the number of individuals at time <span class="math inline">\(t\)</span>.</p>
+<p>We can use the <code>lag()</code> function in <code>dplyr</code> to calculate the yearly growth rate for each country/region in the dataset. As an example, we can see the population growth rate of the world starting from 1950 as shown in this plot:</p>
+<pre class="r"><code>population %&gt;%
+  filter(Country == &quot;WORLD&quot;) %&gt;%
+  mutate(growth_rate = population/lag(population, 1) - 1) %&gt;%
+  ggplot(aes(year, growth_rate)) +
+  geom_line(size = 1, color = &quot;#f15c5c&quot;) + 
+  scale_y_continuous(labels = percent_format(), limits = c(0, 0.022)) +
+  scale_x_continuous(breaks = pretty_breaks(n = 6)) + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = &quot;bold&quot;, size = rel(1.8), family = &quot;Merriweather&quot;),
+    plot.subtitle = element_text(size = rel(1.2), family = &quot;Merriweather Light&quot;, margin = margin(0,0,20,0)),
+    text = element_text(family = &quot;Noto Sans CJK JP Light&quot;),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    panel.grid.minor = element_blank()
+  ) + 
+  labs(
+    x = &quot;Year&quot;,
+    y = &quot;Population Growth Rate (%)&quot;,
+    title = &quot;Population Growth Rate of the World&quot;,
+    subtitle = &quot;Average yearly change in population between 1950-2015&quot;
+  )</code></pre>
+<p><img src="/posts/2018-01-29-population-growth-and-doubling-times-with-tidyverse_files/figure-html/example%20growth%20rate-1.png" width="1260" /></p>
+<p>But this was for one region in the entire dataset! How can we fit this model for all regions? Easy, we just use <code>map()</code> from the <code>purrr</code> package which lets us extend a function to different kinds of groups within the data which in this case are countries/regions. This can be done by first nesting all the yearly population changes for each country as a dataframe, fitting the desired function for each country, and then unnesting to get rates for all countries.</p>
+<pre class="r"><code>growth_rate &lt;- function(df) {
+  return(df %&gt;% transmute(growth_rate = population/lag(population, 1) - 1))
+}
+
+population_growth &lt;- population %&gt;%
+  group_by(Country) %&gt;%
+  nest() %&gt;%
+  mutate(growth = map(data, growth_rate)) %&gt;%
+  unnest()
+
+population_growth</code></pre>
+<pre><code>## # A tibble: 18,018 x 5
+##    Country  code  year population growth_rate
+##    &lt;chr&gt;   &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
+##  1 WORLD     900  1950    2536275     NA     
+##  2 WORLD     900  1951    2583817      0.0187
+##  3 WORLD     900  1952    2630584      0.0181
+##  4 WORLD     900  1953    2677230      0.0177
+##  5 WORLD     900  1954    2724302      0.0176
+##  6 WORLD     900  1955    2772243      0.0176
+##  7 WORLD     900  1956    2821383      0.0177
+##  8 WORLD     900  1957    2871952      0.0179
+##  9 WORLD     900  1958    2924081      0.0182
+## 10 WORLD     900  1959    2977825      0.0184
+## # ... with 18,008 more rows</code></pre>
+<p>Let’s look at the first plot in this post, but from the perspective of population growth rate:</p>
+<pre class="r"><code>population_growth %&gt;%
+  filter(str_detect(Country, &quot;WORLD|income&quot;)) %&gt;%
+  ggplot(aes(year, growth_rate, group = Country, color = Country)) +
+  geom_line(size = 1) + 
+  scale_y_continuous(breaks = seq(0, 0.03, by = 0.005), limits = c(0, 0.03), labels = percent_format()) +
+  scale_x_continuous(breaks = pretty_breaks(n = 6)) +
+  scale_color_kani() + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = &quot;bold&quot;, size = rel(1.8), family = &quot;Merriweather&quot;),
+    plot.subtitle = element_text(size = rel(1.2), family = &quot;Merriweather Light&quot;, margin = margin(0,0,20,0)),
+    text = element_text(family = &quot;Noto Sans CJK JP Light&quot;),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    legend.position = &quot;top&quot;,
+    panel.grid.minor = element_blank(),
+    legend.text = element_text(size = rel(0.8))
+  ) + 
+  labs(
+    title = &quot;Population growth rates in countries\ndifferentiated by income&quot;,
+    y = &quot;Population Growth Rate (%)&quot;,
+    x = &quot;Year&quot;,
+    color = &quot;&quot;,
+    subtitle = &quot;As the world population growth rate falls,\nlow income countries are experiencing higher growth rates.&quot;
+  )</code></pre>
+<p><img src="/posts/2018-01-29-population-growth-and-doubling-times-with-tidyverse_files/figure-html/growth%20rates%20in%20selected%20regions-1.png" width="1260" /></p>
+<p>We see that while the low-income countries line was at the bottom of the chart in the first plot indicating their population numbers havent gone up by much, they still experience the highest percentage changes in their population. Low income counties started at 1.4% growth rate and then jumped up to being the highest in comparison to countries with higher income, 2.7%. This is mostly because of a dual effect: high birth rates and presence of a younger population compared to the rest, but I will most probably explore this further in future posts.</p>
+</div>
+<div id="doubling-times" class="section level2">
+<h2>Doubling Times</h2>
+<p>We now focus on doubling times, or the metric which looks at how long does it take for a region to double its population. This is important because the onset of modernity (starting in mid 20th century), something that brought in better standards of living and health has resulted in a rapid population growth, but that historical growth has now slowed down greatly. The peak growth rate was in 1960s at about 2.1% and has since fallen to about half of that. It would be interesting to see how long it took for the population to double in the 60s versus now.</p>
+<p>Mathematically, the doubling time for a given year can be given as follows:</p>
+<p><span class="math display">\[
+Doubling \ Time = \frac{\ln(2)}{r_t}
+\]</span></p>
+<p>Where <span class="math inline">\(r\)</span> is the growth rate of the region at time <span class="math inline">\(t\)</span>. We assume that human population growth follows a exponential curve that explains the <span class="math inline">\(\ln(2)\)</span> component.</p>
+<p>We can now use this and fit it to all regions described in the dataset.</p>
+<pre class="r"><code>population_rates &lt;- population_growth %&gt;%
+  group_by(Country) %&gt;%
+  nest() %&gt;%
+  mutate(doubling_time = map(data, function(df) {return(log(2)/df$growth_rate)})) %&gt;%
+  unnest()
+
+population_rates</code></pre>
+<pre><code>## # A tibble: 18,018 x 6
+##    Country doubling_time  code  year population growth_rate
+##    &lt;chr&gt;           &lt;dbl&gt; &lt;int&gt; &lt;dbl&gt;      &lt;dbl&gt;       &lt;dbl&gt;
+##  1 WORLD            NA     900  1950    2536275     NA     
+##  2 WORLD            37.0   900  1951    2583817      0.0187
+##  3 WORLD            38.3   900  1952    2630584      0.0181
+##  4 WORLD            39.1   900  1953    2677230      0.0177
+##  5 WORLD            39.4   900  1954    2724302      0.0176
+##  6 WORLD            39.4   900  1955    2772243      0.0176
+##  7 WORLD            39.1   900  1956    2821383      0.0177
+##  8 WORLD            38.7   900  1957    2871952      0.0179
+##  9 WORLD            38.2   900  1958    2924081      0.0182
+## 10 WORLD            37.7   900  1959    2977825      0.0184
+## # ... with 18,008 more rows</code></pre>
+<p>Let’s look at the doubling times of countries based differentiated by income levels as an example:</p>
+<pre class="r"><code>population_rates %&gt;%
+  filter(str_detect(Country, &quot;WORLD|income&quot;)) %&gt;%
+  ggplot(aes(year, doubling_time, group = Country, color = Country)) +
+  geom_line(size = 1) + 
+  scale_y_continuous(breaks = seq(0, 150, by = 25), limits = c(0, 150)) +
+  scale_x_continuous(breaks = pretty_breaks(n = 6)) +
+  scale_color_kani() + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(face = &quot;bold&quot;, size = rel(1.8), family = &quot;Merriweather&quot;),
+    plot.subtitle = element_text(size = rel(1.2), family = &quot;Merriweather Light&quot;, margin = margin(0,0,20,0)),
+    text = element_text(family = &quot;Noto Sans CJK JP Light&quot;),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    legend.position = &quot;top&quot;,
+    panel.grid.minor = element_blank(),
+    legend.text = element_text(size = rel(0.8))
+  ) + 
+  labs(
+    title = &quot;Population Doubling times in the world&quot;,
+    subtitle = &quot;Higher income countries take the longest time to double their\npopulation while the lower income ones take the least time&quot;,
+    y = &quot;Doubling time in years&quot;,
+    x = &quot;Year&quot;,
+    color = &quot;&quot;
+  )</code></pre>
+<p><img src="/posts/2018-01-29-population-growth-and-doubling-times-with-tidyverse_files/figure-html/unnamed-chunk-1-1.png" width="1260" /></p>
+</div>
+<div id="visualizing-growth-and-doubling-times-in-different-regions" class="section level2">
+<h2>Visualizing Growth and Doubling Times in Different regions</h2>
+<p>So far, we’ve seen growth rates in countries grouped together in bins or buckets based on income levels, what if we wanted to decompose these and actually look at countries? We can always select a bunch of countries and show them in a single graph, or even make separate graphs and show them in the same plot as different boxes using <code>facet_wrap()</code>.</p>
+<p>This is great, but it can also mask regional patterns, what if all Scandinavian countries experienced similar trends? What is an intelligent way to group them together? One way is to manually do it, but this is where the <code>geofacet</code> package comes into play. With the <code>geofacet</code> package, one can create a grid as we will see below and pre-define the positions of each country/region so that they can mimic a world map!</p>
+<p>As an example, we look at European Countries:</p>
+<pre class="r"><code>europe_grid &lt;- data.frame(
+  row = c(1, 2, 2, 2, 2, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 9, 9),
+  col = c(1, 4, 5, 6, 7, 1, 2, 5, 7, 8, 4, 5, 6, 7, 8, 2, 3, 4, 5, 6, 7, 8, 1, 2, 4, 5, 6, 7, 8, 4, 6, 7, 8, 7, 8, 6, 7, 8),
+  code = c(&quot;ISL&quot;, &quot;NOR&quot;, &quot;SWE&quot;, &quot;FIN&quot;, &quot;EST&quot;, &quot;IRL&quot;, &quot;GBR&quot;, &quot;DEN&quot;, &quot;LAT&quot;, &quot;RUS&quot;, &quot;NLD&quot;, &quot;DEU&quot;, &quot;POL&quot;, &quot;LTU&quot;, &quot;BLR&quot;, &quot;FRA&quot;, &quot;BEL&quot;, &quot;LUX&quot;, &quot;AUT&quot;, &quot;CZE&quot;, &quot;SVK&quot;, &quot;UKR&quot;, &quot;PRT&quot;, &quot;ESP&quot;, &quot;CHE&quot;, &quot;SVN&quot;, &quot;HUN&quot;, &quot;ROU&quot;, &quot;MDA&quot;, &quot;ITA&quot;, &quot;HRV&quot;, &quot;SRB&quot;, &quot;BGR&quot;, &quot;MNE&quot;, &quot;MKD&quot;, &quot;BIH&quot;, &quot;ALB&quot;, &quot;GRC&quot;),
+  name = c(&quot;Iceland&quot;, &quot;Norway&quot;, &quot;Sweden&quot;, &quot;Finland&quot;, &quot;Estonia&quot;, &quot;Ireland&quot;, &quot;United Kingdom&quot;, &quot;Denmark&quot;, &quot;Latvia&quot;, &quot;Russian Federation&quot;, &quot;Netherlands&quot;, &quot;Germany&quot;, &quot;Poland&quot;, &quot;Lithuania&quot;, &quot;Belarus&quot;, &quot;France&quot;, &quot;Belgium&quot;, &quot;Luxembourg&quot;, &quot;Austria&quot;, &quot;Czechia&quot;, &quot;Slovakia&quot;, &quot;Ukraine&quot;, &quot;Portugal&quot;, &quot;Spain&quot;, &quot;Switzerland&quot;, &quot;Slovenia&quot;, &quot;Hungary&quot;, &quot;Romania&quot;, &quot;Republic of Moldova&quot;, &quot;Italy&quot;, &quot;Croatia&quot;, &quot;Serbia&quot;, &quot;Bulgaria&quot;, &quot;Montenegro&quot;, &quot;TFYR Macedonia&quot;, &quot;Bosnia and Herzegovina&quot;, &quot;Albania&quot;, &quot;Greece&quot;),
+  stringsAsFactors = FALSE
+)
+
+euro_facets &lt;- population_rates %&gt;%
+  filter(Country %in% europe_grid$name) %&gt;%
+  ggplot(aes(year, growth_rate, group = Country)) + 
+  geom_line(color = &quot;#79bd9a&quot;, size = 1) + 
+  scale_y_continuous(labels = percent_format()) +
+  facet_geo(~Country, grid = europe_grid) + 
+  theme_kani() + 
+  theme(
+    plot.title = element_text(face = &quot;bold&quot;, size = rel(1.8), family = &quot;Merriweather&quot;),
+    plot.subtitle = element_text(size = rel(1.2), family = &quot;Merriweather Light&quot;, margin = margin(0,0,20,0)),
+    text = element_text(family = &quot;Noto Sans CJK JP Light&quot;),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = &quot;white&quot;),
+    panel.background = element_rect(fill = &quot;white&quot;),
+    strip.background = element_rect(fill = &quot;white&quot;),
+    strip.text.x = element_text(face = &quot;bold&quot;)
+  ) + 
+  labs(
+    title = &quot;Population growth rates in Europe&quot;,
+    y = &quot;Population Growth Rate (%)&quot;,
+    x = &quot;&quot;,
+    color = &quot;&quot;,
+    subtitle = &quot;Europe has been facing a bit of a population decline. &quot;
+  )
+
+ggsave(&quot;../../static/img/eu_population_growth.png&quot;, euro_facets, height = 15, width = 20)
+
+euro_facets</code></pre>
+<p><img src="/posts/2018-01-29-population-growth-and-doubling-times-with-tidyverse_files/figure-html/unnamed-chunk-2-1.png" width="2700" /></p>
+<p>Check <a href="/img/eu_population_growth.png">enlarged version</a>. We see that most of Europe is beginning to enter the population decline phase, there is a small upward trend in some countries, but this is mostly because of the mass-migration. Most of Europe has already entered the phase of population decline.</p>
+<p>What about the doubling times in South America?</p>
+<pre class="r"><code>south_america_grid &lt;- data.frame(
+  row = c(1, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 4),
+  col = c(1, 2, 3, 4, 5, 2, 3, 4, 5, 3, 4, 5, 4),
+  code = c(&quot;COL&quot;, &quot;VEN&quot;, &quot;GUY&quot;, &quot;SUR&quot;, &quot;GUF&quot;, &quot;ECU&quot;, &quot;PER&quot;, &quot;BOL&quot;, &quot;BRA&quot;, &quot;CHL&quot;, &quot;PRY&quot;, &quot;URY&quot;, &quot;ARG&quot;),
+  name = c(&quot;Colombia&quot;, &quot;Venezuela (Bolivarian Republic of)&quot;, &quot;Guyana&quot;, &quot;Suriname&quot;, &quot;French Guiana&quot;, &quot;Ecuador&quot;, &quot;Peru&quot;, &quot;Bolivia (Plurinational State of)&quot;, &quot;Brazil&quot;, &quot;Chile&quot;, &quot;Paraguay&quot;, &quot;Uruguay&quot;, &quot;Argentina&quot;),
+  stringsAsFactors = FALSE
+)
+
+sa_facets &lt;- population_rates %&gt;%
+  filter(Country %in% south_america_grid$name) %&gt;%
+  ggplot(aes(year, doubling_time, group = Country)) + 
+  geom_line(color = &quot;#8283a7&quot;, size = 1) + 
+  scale_x_continuous(breaks = seq(1950, 2010, length = 5)) +
+  scale_y_continuous(breaks = pretty_breaks(7)) +
+  facet_geo(~Country, grid = south_america_grid, scales = &quot;free&quot;) + 
+  theme_kani() + 
+  theme(
+    plot.title = element_text(face = &quot;bold&quot;, size = rel(1.8), family = &quot;Merriweather&quot;),
+    plot.subtitle = element_text(size = rel(1.2), family = &quot;Merriweather Light&quot;, margin = margin(0,0,20,0)),
+    text = element_text(family = &quot;Noto Sans CJK JP Light&quot;),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = &quot;white&quot;),
+    panel.background = element_rect(fill = &quot;white&quot;),
+    strip.background = element_rect(fill = &quot;white&quot;),
+    strip.text.x = element_text(face = &quot;bold&quot;, size = rel(1.1))
+  ) + 
+  labs(
+    title = &quot;Population Doubling Times in South America&quot;,
+    x = &quot;&quot;,
+    y = &quot;Doubling Time in years&quot;,
+    color = &quot;&quot;,
+    subtitle = &quot;More stable trend for larger countries, less so for the smaller ones&quot;
+  )
+
+ggsave(&quot;../../static/img/sa_doubling.png&quot;, sa_facets, height = 12, width = 16)
+
+sa_facets</code></pre>
+<p><img src="/posts/2018-01-29-population-growth-and-doubling-times-with-tidyverse_files/figure-html/unnamed-chunk-3-1.png" width="2880" /></p>
+<p>Check <a href="/img/sa_doubling.png">enlarged version</a>. The population boom between 60s and 80s did affect most of South America since there was a decline in the doubling times (for at least the larger countries, by size). This was also a time when the fastest doubling of the world population happened, from 2.5 billion people to 5 billion people in just 37 years (1950 - 1987)! The UN projections with the most likely scenario (SSP2) indicate that by 2088, it will take another 100 years for the world population to double (Our World in Data, 2015).</p>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>This was a simple post that introduces some helpful rates and measures to understand population change in the world. The visualizations in the post showed how countries with different income levels (as categorized by the UN) differ in their respective population growth rates as well as doubling times, and then we further decomposed these groupings by plotting the country specific measures using <code>geofacet</code>.</p>
+<p>It is exciting to see what the future holds in terms of population changes and hope to continue working with more complex demographic data to produce interesting analyses to blog about! I am very happy to get feedback on this post so please reach out to me via <a href="https://twitter.com/iamasharkskin">Twitter</a> if you have any comments to make!</p>
+</div>
+
+                </section>
+            </article>
+
+            
+                <a class="twitter" href="https://twitter.com/intent/tweet?text=%2f2018%2fpopulation-growth-and-doubling-times-with-tidyverse%2f - Population%20growth%20and%20Doubling%20times%20with%20tidyverse by @iamasharkskin"><span class="icon-twitter"> tweet</span></a>
+
+<a class="facebook" href="#" onclick="
+    window.open(
+      'https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(location.href),
+      'facebook-share-dialog',
+      'width=626,height=436');
+    return false;"><span class="icon-facebook-rect"> Share</span>
+</a>
+
+            
+
+            
+
+            
+
+            <footer id="footer">
+    
+        <div id="social">
+
+	
+	
+    <a class="symbol" href="https://www.facebook.com/iamasharkskin">
+        <i class="fa fa-facebook-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://www.github.com/kanishkamisra">
+        <i class="fa fa-github-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://www.linkedin.com/in/kanishkamisra/">
+        <i class="fa fa-linkedin-square"></i>
+    </a>
+    
+    <a class="symbol" href="https://www.twitter.com/iamasharkskin">
+        <i class="fa fa-twitter-square"></i>
+    </a>
+    
+
+
+</div>
+
+    
+    <p class="small">
+    
+       © Copyright 2018 <i class="fa fa-heart" aria-hidden="true"></i> Kanishka Misra
+    
+    </p>
+    <p class="small">
+        Powered by <a href="http://www.gohugo.io/">Hugo</a> Theme By <a href="https://github.com/nodejh/hugo-theme-cactus-plus">nodejh</a>
+    </p>
+</footer>
+
+        </section>
+
+        <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+  tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+
+
+  <script src="/js/highlight.min.js" defer></script>
+  
+
+
+
+
+
+<script>
+window.ga=window.ga||function(){(ga.q=ga.q||[]).push(arguments)};ga.l=+new Date;
+ga('create', 'your_google_analytics_id', 'auto');
+ga('send', 'pageview');
+</script>
+<script async src='//www.google-analytics.com/analytics.js'></script>
+
+
+<script>
+  window.onload = function() {
+    
+      hljs.initHighlighting();
+    
+    
+  };
+</script>
+    </body>
+</html>

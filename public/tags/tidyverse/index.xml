@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Tidyverse on Kanishka Misra</title>
+    <link>/tags/tidyverse/</link>
+    <description>Recent content in Tidyverse on Kanishka Misra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Mon, 29 Jan 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/tidyverse/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Population growth and Doubling times with tidyverse</title>
+      <link>/2018/population-growth-and-doubling-times-with-tidyverse/</link>
+      <pubDate>Mon, 29 Jan 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/population-growth-and-doubling-times-with-tidyverse/</guid>
+      <description>Background Ever since I worked on data about populations at my internship at Perscio, a healthcare data analysis firm in Indianapolis, as well as worked with a Professor of Demography and Social Policy on a paper about demographic data, I have gained interest in population problems - mostly through readings.
+The best way to restart this journey would be to do so using what population problems often involve: Data analysis. In this post, we define and calculate population growth rates as well as doubling times of several countries and then finally produce intuitive visualizations of these numbers.</description>
+    </item>
+    
+  </channel>
+</rss>
