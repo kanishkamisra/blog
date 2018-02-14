@@ -6,7 +6,7 @@
     <description>Recent content in Posts on Kanishka Misra</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en</language>
-    <lastBuildDate>Mon, 29 Jan 2018 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 14 Feb 2018 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
     
@@ -14,7 +14,7 @@
     <item>
       <title>Population growth and Doubling times with tidyverse</title>
       <link>/2018/population-growth-and-doubling-times-with-tidyverse/</link>
-      <pubDate>Mon, 29 Jan 2018 00:00:00 +0000</pubDate>
+      <pubDate>Wed, 14 Feb 2018 00:00:00 +0000</pubDate>
       
       <guid>/2018/population-growth-and-doubling-times-with-tidyverse/</guid>
       <description>Background Ever since I worked on data about populations at my internship at Perscio, a healthcare data analysis firm in Indianapolis, as well as worked with a Professor of Demography and Social Policy on a paper about demographic data, I have gained interest in population problems - mostly through readings.
