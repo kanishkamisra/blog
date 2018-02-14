@@ -19,6 +19,9 @@ knitr::opts_chunk$set(cache = TRUE, warning = FALSE, message = FALSE,
                       echo = TRUE, dpi = 180)
 ```
 
+> *Roses are red, violets are blue*
+
+> *This is a forced rhyme, here's blog post two!*
 
 ## Background
 
