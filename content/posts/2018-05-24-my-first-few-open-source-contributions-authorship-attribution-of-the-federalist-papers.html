@@ -1,0 +1,251 @@
+---
+title: 'My first few open source contributions: Authorship Attribution of the Federalist
+  Papers'
+description: Analysing the disputed authorship of 12 Federalist Papers using widyr and tidytext.
+author: Kanishka
+date: '2018-05-24'
+slug: my-first-few-open-source-contributions-authorship-attribution-of-the-federalist-papers
+categories: []
+tags:
+  - stylometry
+  - open source
+  - tidytext
+---
+
+
+
+<div id="background" class="section level2">
+<h2>Background</h2>
+<p>During the last semester of my undergraduate education at Purdue, I was engaged in a research project that analyzed conversation between two participants, and delivered some insight regarding the two participants’ future interaction(this will be expanded further in a blog post maybe). This problem somewhat involved authorship profiling and verification, two fields that have been heavily studied in traditional NLP problems and along with authorship attribution are collectively known as Stylometry. Stylometry assumes that each author has a specific style that he/she employs in her writing and uses statistical and computational methods in order to either profile the author, determine the author or verify the author of a given written material.</p>
+<p>The Federalist Papers problem is a classic stylometry problem that was first studied using statistical toolkits by Mostellar and Wallace. The papers were written as essays between 1787 - 1788 by Alexander Hamilton, John Jay and James Madison (who later became the president of United States) to promote the ratification of the constitution. They were all authored under the pseudonym ‘Publius’, which was a tribute to the founder of the Roman Republic, but were then confirmed to be written by the three authors where Hamilton wrote 51 essays, Jay wrote 5, Madison wrote 14, and Hamilton and Madison co-authored 3. The authorship of the remaining 12 has been in dispute. Mostellar and Wallace used probability distributions to represent word frequencies and concluded that the 12 papers with disputed authorship were written by Madison.</p>
+<p>In this post, I will leverage some of the open source contributions I made to the R packages <code>widyr</code> and <code>tidytext</code> and combine them to present a naive analysis of the authorship of the <em>disputed papers</em>.</p>
+</div>
+<div id="contributing-code-to-r-packages" class="section level2">
+<h2>Contributing code to R packages</h2>
+<p>Before I move on, I would like to thank the creators of the <code>widyr</code> and <code>tidytext</code> packages, <a href="https://juliasilge.com/">Julia Silge</a> (for <code>tidytext</code>) and <a href="http://varianceexplained.org/">David Robinson</a> (for <code>widyr</code> and <code>tidytext</code>) to have given me the chance to add new features to their packages.</p>
+<div id="widyr" class="section level3">
+<h3>Widyr</h3>
+<p>This was my first ever code contributing open source contribution, where I added the <code>pairwise_delta</code> method to a list of pairwise calculations that <code>widyr</code> offers. This method essentially implements the Burrows’ Delta method which is a distance calculation between documents and has stylometric benefits. It can be mathematically defined as:</p>
+<p><span class="math display">\[
+  \frac{1}{n}\sum_{i = 1}^{n}{|z_i(D_1) - z_i(D_2)|}
+\]</span></p>
+<p>Or, for 2 documents <span class="math inline">\(D_1\)</span> and <span class="math inline">\(D_2\)</span> the average manhattan distance between the z-scores for word frequencies of word <span class="math inline">\(i\)</span> in the documents. The z-scores standardize the frequencies of each word to have 0 mean and 1 standard deviation (normal distribution centered around 0). There has been a little bit of dispute about the mathematical foundations of this method, the explanation and resolution of which can be found in <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.842.4317&amp;rep=rep1&amp;type=pdf">Argamon’s paper</a>, but since it has historically worked so well in authorship attribution, it is still used when distance based methods get employed.</p>
+</div>
+<div id="tidytext" class="section level3">
+<h3>Tidytext</h3>
+<p>I’d personally describe this countribution as ‘cheeky’ because I basically added very few lines of code but that is just because how well the foundations of adding new material to the package’s function is. I implemented the functionality of tokenizing by character ngrams, also called as <code>character_shingles</code>.</p>
+<p>A character shingle is basically a contiguous sequence of characters from a given piece of text. Something like:</p>
+<div class="figure">
+<img src="/img/figure5-1.jpg" />
+
+</div>
+<p>Where we can see how a character 5-gram is constructed (this example uses spaces, but we will be ignoring any punctuation to keep things simple).</p>
+<p>Character ngrams work well in certain nlp tasks as features of a document feature matrix, because they can:</p>
+<ol style="list-style-type: decimal">
+<li>Reduce the number of features.</li>
+<li>Capture cutural morphological differences of the same word (color and colour would be captured as col, etc. when n = 3).</li>
+<li>Detect misspellings.</li>
+</ol>
+<!-- Add Image for character ngrams -->
+<p>Thus, we can, in theory, leverage character shingles as our features in hopes of detecting styles in our authorship problem.</p>
+</div>
+</div>
+<div id="loading-libraries" class="section level2">
+<h2>Loading libraries</h2>
+<p>We can get all the federalist papers corpus from the <code>corpus</code> library.</p>
+<pre class="r"><code>library(corpus)
+library(tidyverse)
+library(widyr)
+library(tidytext)
+
+federalist &lt;- as.tibble(federalist)</code></pre>
+<p>We can quickly glance the number of papers per author</p>
+<pre class="r"><code>federalist %&gt;%
+  count(author)</code></pre>
+<pre><code>## # A tibble: 4 x 2
+##   author       n
+##   &lt;chr&gt;    &lt;int&gt;
+## 1 Hamilton    51
+## 2 Jay          5
+## 3 Madison     14
+## 4 &lt;NA&gt;        15</code></pre>
+<p>The 15 NAs include the ones co-authored by Hamilton and Madison, these are Nos. 18-20. We remove them since we cannot determine which parts of the papers were written by which author. We also remove the ones written by Jay since the disputed papers are believed to be written by either Hamilton or Madison.</p>
+<pre class="r"><code>fed_papers &lt;- federalist %&gt;%
+  replace_na(list(author = &quot;Unknown&quot;)) %&gt;%
+  filter(!(name %in% paste(&quot;Federalist No.&quot;, as.character(18:20))), author != &quot;Jay&quot;)
+
+fed_papers</code></pre>
+<pre><code>## # A tibble: 77 x 6
+##    name              title  venue date       author text                  
+##    &lt;chr&gt;             &lt;chr&gt;  &lt;chr&gt; &lt;date&gt;     &lt;chr&gt;  &lt;chr&gt;                 
+##  1 Federalist No. 1  Gener… For … NA         Hamil… &quot;To the People of the…
+##  2 Federalist No. 6  Conce… For … NA         Hamil… &quot;To the People of the…
+##  3 Federalist No. 7  The S… For … NA         Hamil… &quot;To the People of the…
+##  4 Federalist No. 8  The C… From… 1787-11-20 Hamil… &quot;To the People of the…
+##  5 Federalist No. 9  The U… For … NA         Hamil… &quot;To the People of the…
+##  6 Federalist No. 10 The S… From… 1787-11-23 Madis… &quot;To the People of the…
+##  7 Federalist No. 11 The U… For … NA         Hamil… &quot;To the People of the…
+##  8 Federalist No. 12 The U… From… 1787-11-27 Hamil… &quot;To the People of the…
+##  9 Federalist No. 13 Advan… For … NA         Hamil… &quot;To the People of the…
+## 10 Federalist No. 14 Objec… From… 1787-11-30 Madis… &quot;To the People of the…
+## # ... with 67 more rows</code></pre>
+<p>Now that we have content written by 3 authors - Hamilton, Madison and ‘Unknown’, we can compare the styles of each author by calculating the delta metric using my <code>pairwise_delta</code> implementation. Specifically, we can calculate the delta distance by considering relative frequencies of character ngrams/shingles that are evaluated by the <code>'character_shingles'</code> argument passed to the <code>unnest_tokens</code> method in <code>tidytext</code>, which by default makes character trigrams.</p>
+<pre class="r"><code># Make an author-paper mapping that can be used later.
+fed_authors &lt;- fed_papers %&gt;%
+  select(name, author)
+
+fed_shingles &lt;- fed_papers %&gt;%
+  select(name, text) %&gt;%
+  group_by(name) %&gt;%
+  unnest_tokens(shingle, text, &quot;character_shingles&quot;) %&gt;%
+  ungroup()
+
+fed_shingles %&gt;%
+  count(shingle) %&gt;%
+  arrange(-n)</code></pre>
+<pre><code>## # A tibble: 6,067 x 2
+##    shingle     n
+##    &lt;chr&gt;   &lt;int&gt;
+##  1 the     21697
+##  2 ion      7321
+##  3 tio      5976
+##  4 ent      5388
+##  5 oft      5139
+##  6 and      5060
+##  7 fth      5060
+##  8 ati      3956
+##  9 nth      3879
+## 10 tha      3633
+## # ... with 6,057 more rows</code></pre>
+<p>There are over 6000 different character trigrams in the whole corpus, but we don’t have to consider all the trigrams as features. Burrows’ Delta was defined to include the n most frequent words (since it was defined only for words), so we can include the n most frequent features, or trigrams in our analysis. Let’s pick an arbritrary number, say 1000 (if this was a research paper, we would have evaluated the proper number of features by looking at maybe the clustering quality by cliustering on the delta and choosing n where the rand index is maximum)</p>
+<pre class="r"><code>top_shingles &lt;- fed_shingles %&gt;%
+  count(shingle) %&gt;%
+  top_n(1000, n)
+
+top_shingles</code></pre>
+<pre><code>## # A tibble: 1,004 x 2
+##    shingle     n
+##    &lt;chr&gt;   &lt;int&gt;
+##  1 abl      1099
+##  2 acc       239
+##  3 ace       395
+##  4 ach       483
+##  5 aco       374
+##  6 act       820
+##  7 ade       428
+##  8 adi       234
+##  9 adm       290
+## 10 adv       294
+## # ... with 994 more rows</code></pre>
+<p>We can now filter all our documents in <code>fed_shingles</code> to have only the trigrams that are in the top 1000 trigrams of the entire corpus while simultaneously also computing the relative frequencies of the trigrams (do this prior to filtering).</p>
+<pre class="r"><code>fed_freq &lt;- fed_shingles %&gt;%
+  count(name, shingle) %&gt;%
+  group_by(name) %&gt;%
+  mutate(rel_freq = n/sum(n)) %&gt;%
+  ungroup() %&gt;%
+  filter(shingle %in% top_shingles$shingle)
+
+fed_freq</code></pre>
+<pre><code>## # A tibble: 73,910 x 4
+##    name             shingle     n rel_freq
+##    &lt;chr&gt;            &lt;chr&gt;   &lt;int&gt;    &lt;dbl&gt;
+##  1 Federalist No. 1 abl         9 0.00117 
+##  2 Federalist No. 1 acc         2 0.000260
+##  3 Federalist No. 1 ace         2 0.000260
+##  4 Federalist No. 1 ach         1 0.000130
+##  5 Federalist No. 1 act         5 0.000651
+##  6 Federalist No. 1 ade         4 0.000520
+##  7 Federalist No. 1 adi         3 0.000390
+##  8 Federalist No. 1 adm         2 0.000260
+##  9 Federalist No. 1 adv         3 0.000390
+## 10 Federalist No. 1 aff         3 0.000390
+## # ... with 73,900 more rows</code></pre>
+<p>The pairwise family of functions in <code>widyr</code> need 3 things as inputs: the item/document column where each value denotes an individual item which is repeated to account for each feature represented by a feature column (in long format as opposed to wide), and the values of the feautures corresponding to the document, once this is passed, the following workflow takes place:</p>
+<div class="figure">
+<img src="/img/widyr-workflow.jpg" />
+
+</div>
+<p>Widyr essentially takes a long format data, widens it to something you normally see, a matrix format, performs the pairswise operation to return a pairwise matrix, and re-formats it into a long format to give item-item pairwise long tibble with the respective pairwise metric values.</p>
+<pre class="r"><code>fed_deltas &lt;- fed_freq %&gt;%
+  pairwise_delta(name, shingle, rel_freq)
+
+fed_deltas</code></pre>
+<pre><code>## # A tibble: 5,852 x 3
+##    item1             item2            delta
+##    &lt;chr&gt;             &lt;chr&gt;            &lt;dbl&gt;
+##  1 Federalist No. 10 Federalist No. 1 1.02 
+##  2 Federalist No. 11 Federalist No. 1 1.07 
+##  3 Federalist No. 12 Federalist No. 1 1.04 
+##  4 Federalist No. 13 Federalist No. 1 1.18 
+##  5 Federalist No. 14 Federalist No. 1 1.00 
+##  6 Federalist No. 15 Federalist No. 1 0.948
+##  7 Federalist No. 16 Federalist No. 1 1.06 
+##  8 Federalist No. 17 Federalist No. 1 1.07 
+##  9 Federalist No. 21 Federalist No. 1 1.03 
+## 10 Federalist No. 22 Federalist No. 1 0.902
+## # ... with 5,842 more rows</code></pre>
+<p>We now have each document, and its measure of <em>naive</em> stylistic similarity(or deviance) with respect to every other document, we can use this to analyse the authorship of the 12 disputed papers.</p>
+</div>
+<div id="reaching-higher-dimensions" class="section level2">
+<h2>Reaching higher dimensions</h2>
+<p>Since Delta is a distance measure, the ones with lower values are close to each other, while ones with larger values are less similar. We can effectively visualize this using a multi-dimensional scaling method which takes a complete pairwise distance matrix and defines coordinates for each individual document (or item) such that the distance between every document with every other document is more or less maintained (there is some information loss).</p>
+<p>MDS exists for base R but hasn’t been implemented for something like a widyr-processed tibble, to make this work, I implemented it so that it can become friendly with widyr based outputs, with the following code, you can see how a widyr function can be constructed!</p>
+<pre class="r"><code>multi_scale &lt;- function(tbl, item1, item2, value, k = 2) {
+  multi_scale_(tbl,
+               widyr:::col_name(substitute(item1)),
+               widyr:::col_name(substitute(item2)),
+               widyr:::col_name(substitute(value)),
+               k = 2)
+}
+
+
+multi_scale_ &lt;- function(tbl, item1, item2, value, k = 2) {
+  tbl_matrix &lt;- tbl %&gt;%
+    spread(item2, widyr:::col_name(value), fill = 0) %&gt;%
+    as.data.frame() %&gt;%
+    remove_rownames() %&gt;%
+    column_to_rownames(&quot;item1&quot;) %&gt;%
+    as.matrix()
+
+  cmdscale(tbl_matrix, k = k) %&gt;%
+    as.data.frame() %&gt;%
+    rownames_to_column(&quot;item&quot;) %&gt;%
+    as.tibble()
+}</code></pre>
+<p>We can now simply pass the item-item pairwise delta tibble to multi_scale to return something that can easily work with ggplot2 to understand our results better:</p>
+<pre class="r"><code>fed_deltas %&gt;%
+  multi_scale(item1, item2, delta) %&gt;%
+  ggplot(aes(V1, V2)) +
+  geom_point()</code></pre>
+<p><img src="/posts/2018-05-24-my-first-few-open-source-contributions-authorship-attribution-of-the-federalist-papers_files/figure-html/unnamed-chunk-9-1.png" width="1260" /></p>
+<p>This is great, but we surely need to represent each document by its author, and so we can add a color aesthetic by joining the multiscaled data to the author-paper mapping we created earlier.</p>
+<pre class="r"><code>fed_deltas %&gt;%
+  multi_scale(item1, item2, delta) %&gt;%
+  inner_join(fed_authors, by = c(item = &quot;name&quot;)) %&gt;%
+  ggplot(aes(V1, V2, color = author)) +
+  geom_point(size = 2, alpha = 0.7) +
+  scale_y_continuous(limits = c(-0.7, 0.7), breaks = scales::pretty_breaks(10)) +
+  scale_x_continuous(limits = c(-0.7, 0.7), breaks = scales::pretty_breaks(10)) +
+  scale_color_manual(values = c(&quot;#f26d5b&quot;, &quot;#FFBC42&quot;, &quot;#2b90d9&quot;)) +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(face = &quot;bold&quot;, size = rel(1.8), family = &quot;Merriweather&quot;),
+    plot.subtitle = element_text(size = rel(1.2), family = &quot;Merriweather Light&quot;, margin = margin(0,0,20,0)),
+    text = element_text(family = &quot;Noto Sans CJK JP Light&quot;),
+    axis.title.x = element_text(margin = margin(20, 0, 0, 0)),
+    axis.text = element_text(size = rel(1)),
+    legend.position = &quot;top&quot;,
+    panel.grid.minor = element_blank(),
+    legend.text = element_text(size = rel(1))
+  ) + 
+  labs(
+    title = &quot;Authorship Analysis of the Federalist Papers&quot;,
+    y = &quot;Dimension 2&quot;,
+    x = &quot;Dimension 2&quot;,
+    color = &quot;&quot;,
+    subtitle = &quot;Papers with disputed authors lie far apart from Hamilton\nbut much closer to Madison&quot;
+  )</code></pre>
+<p><img src="/posts/2018-05-24-my-first-few-open-source-contributions-authorship-attribution-of-the-federalist-papers_files/figure-html/unnamed-chunk-10-1.png" width="1260" /></p>
+<p>This plot shows what I described earlier, a 2-dimension representation of the documents having the deviation from each other more or less maintained, accompanied by a little information loss. The dimensions don’t mean much and are arbritrarily defined, unlike PCA where you can study the contribution of each feature to the PCs. But what we see pretty much supports the conclusion by Mostellar and Wallace that the 12 papers with unknown authorship are far away from papers written by Hamilton but are closer to the papers authored by Madison.</p>
+<p>In this post, I quickly demonstrated a naive analysis of the federalist papers problem using my open source contributions along with some very useful tools provided by tidytext, widyr and the tidyverse suite of packages. I enjoyed contributing to open source very much and hope to continue to do so now that I have the opportunity to learn more about Natural Language Processing as I venture into rigorous research as I begin my PhD studies at Purdue starting this fall. Please let me know if you’d like to know more about the work done in this blog post or anything else or if you have any feedback!</p>
+</div>

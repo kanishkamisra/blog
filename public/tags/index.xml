@@ -39,6 +39,15 @@
     </item>
     
     <item>
+      <title>Open Source</title>
+      <link>/tags/open-source/</link>
+      <pubDate>Thu, 24 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/open-source/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Population Studies</title>
       <link>/tags/population-studies/</link>
       <pubDate>Wed, 14 Feb 2018 00:00:00 +0000</pubDate>
@@ -48,11 +57,29 @@
     </item>
     
     <item>
+      <title>Stylometry</title>
+      <link>/tags/stylometry/</link>
+      <pubDate>Thu, 24 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/stylometry/</guid>
+      <description></description>
+    </item>
+    
+    <item>
       <title>Survey Data</title>
       <link>/tags/survey-data/</link>
       <pubDate>Wed, 03 Jan 2018 00:00:00 +0000</pubDate>
       
       <guid>/tags/survey-data/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Tidytext</title>
+      <link>/tags/tidytext/</link>
+      <pubDate>Thu, 24 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/tags/tidytext/</guid>
       <description></description>
     </item>
     

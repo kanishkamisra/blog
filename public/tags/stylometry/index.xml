@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Stylometry on Kanishka Misra</title>
+    <link>/tags/stylometry/</link>
+    <description>Recent content in Stylometry on Kanishka Misra</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Thu, 24 May 2018 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/stylometry/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>My first few open source contributions: Authorship Attribution of the Federalist Papers</title>
+      <link>/2018/my-first-few-open-source-contributions-authorship-attribution-of-the-federalist-papers/</link>
+      <pubDate>Thu, 24 May 2018 00:00:00 +0000</pubDate>
+      
+      <guid>/2018/my-first-few-open-source-contributions-authorship-attribution-of-the-federalist-papers/</guid>
+      <description>Background During the last semester of my undergraduate education at Purdue, I was engaged in a research project that analyzed conversation between two participants, and delivered some insight regarding the two participants’ future interaction(this will be expanded further in a blog post maybe). This problem somewhat involved authorship profiling and verification, two fields that have been heavily studied in traditional NLP problems and along with authorship attribution are collectively known as Stylometry.</description>
+    </item>
+    
+  </channel>
+</rss>

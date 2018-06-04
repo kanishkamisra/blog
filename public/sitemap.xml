@@ -3,6 +3,11 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/2018/my-first-few-open-source-contributions-authorship-attribution-of-the-federalist-papers/</loc>
+    <lastmod>2018-05-24T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/2018/population-growth-and-doubling-times-with-tidyverse/</loc>
     <lastmod>2018-02-14T00:00:00+00:00</lastmod>
   </url>
@@ -41,13 +46,19 @@
   
   <url>
     <loc>/</loc>
-    <lastmod>2018-02-14T00:00:00+00:00</lastmod>
+    <lastmod>2018-05-24T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
     <loc>/tags/mental-health/</loc>
     <lastmod>2018-01-03T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/open-source/</loc>
+    <lastmod>2018-05-24T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -59,7 +70,13 @@
   
   <url>
     <loc>/posts/</loc>
-    <lastmod>2018-02-14T00:00:00+00:00</lastmod>
+    <lastmod>2018-05-24T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/stylometry/</loc>
+    <lastmod>2018-05-24T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
@@ -72,6 +89,12 @@
   <url>
     <loc>/tags/</loc>
     <lastmod>2018-02-14T00:00:00+00:00</lastmod>
+    <priority>0</priority>
+  </url>
+  
+  <url>
+    <loc>/tags/tidytext/</loc>
+    <lastmod>2018-05-24T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
