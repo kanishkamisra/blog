@@ -4,13 +4,9 @@ title = "About"
 hidden = true
 +++
 
-I am an undergraduate student at Purdue University, aspiring to study social science using 
-computational methods to eventually contribute to the growth of a fact based world-view.
+I am a first year PhD Student at Purdue University, working with Dr. Julia Rayz on Natural Language Understanding problems. Eventually I would like to work in the field of Computational Social Science and apply my knowledge of NLP and Machine Learning to solve social science problems in a data driven way. 
 
-
-I am currently working with Dr. Julia Rayz and Dr. Kathryn C. Seigfried-Spellar in order to
-understand online predator behavior by using text as data (preferably in R). 
-
+In my final year of Undergraduate education, I worked with Dr. Julia Rayz and Dr. Kathryn C. Seigfried-Spellar in order to understand online predator behavior by using conversation text as data. 
 
 This blog is built using blogdown and renders my analyses in Rmarkdown into visually appealing
 (hopefully) as well as information rich blog posts that you can read and comment about.
