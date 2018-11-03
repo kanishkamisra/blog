@@ -12,5 +12,3 @@ This blog is built using blogdown and renders my analyses in Rmarkdown into visu
 (hopefully) as well as information rich blog posts that you can read and comment about.
 
 Full cv [here](/pdf/Kanishka_Misra_CV.pdf)
-
-Slides for a presentation [here](https://docs.google.com/presentation/d/1nWN2TK4h-jc0q_t7-C7Ly-mAXj8g1ciSjD9h2hCy_YQ/edit?usp=sharing)
