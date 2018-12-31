@@ -17,7 +17,7 @@ enableEmoji = true
 [params]
 	author = "Kanishka Misra"
 	description = "Blog about Kanishka's Data Projects"
-	bio = "Making opinions fact based again"
+	bio = "A blog on Data and Natural Language"
 	
 	dateFormat = "1996-11-02"
 
